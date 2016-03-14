@@ -28,6 +28,26 @@ public class Reference implements Serializable {
 	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private Collection<Gene> genes = new ArrayList<Gene>();
 	
+	private String name;
+	
+	private String build;
+	
+	public String getBuild() {
+		return build;
+	}
+
+	public void setBuild(String build) {
+		this.build = build;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
 	public Collection<Gene> getGenes() {
 		return genes;
 	}
@@ -42,6 +62,12 @@ public class Reference implements Serializable {
 
 	public Reference() {
 		super();
+	}
+	
+	public Reference(String name, String build) {
+		super();
+		this.name = name;
+		this.build = build;
 	}
    
 }
