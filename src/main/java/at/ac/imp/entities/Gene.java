@@ -23,6 +23,7 @@ public class Gene implements Serializable {
 	private int end;
 	
 	private String geneSymbol;
+	private boolean reverse;
 	private int entrezId;
 
 	public String getChr() {
@@ -64,18 +65,28 @@ public class Gene implements Serializable {
 	public void setEntrezId(int entrezId) {
 		this.entrezId = entrezId;
 	}
+	
+	public boolean isReverse() {
+		return reverse;
+	}
+
+	public void setReverse(boolean reverse) {
+		this.reverse = reverse;
+	}
 
 	public Gene() {
 		super();
 	}
 
-	public Gene(String chr, int start, int end, String geneSymbol, int entrezId) {
+	public Gene(String chr, int start, int end, String geneSymbol, boolean reverse, int entrezId) {
 		super();
 		this.chr = chr;
 		this.start = start;
 		this.end = end;
 		this.geneSymbol = geneSymbol;
+		this.reverse = reverse;
 		this.entrezId = entrezId;
 	}
-   
+
+
 }

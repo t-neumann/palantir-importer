@@ -22,14 +22,27 @@ public class Sample implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
-	@Id @GeneratedValue(strategy=GenerationType.AUTO)
+	@Id
 	private int id;
-	
+
 	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private Collection<Alignment> alignments = new ArrayList<Alignment>();
 
 	public Sample() {
 		super();
+	}
+	
+	public Sample(int id) {
+		super();
+		this.id = id;
+	}
+	
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
 	}
 	
 	public void addAlignment(final Alignment alignment) {

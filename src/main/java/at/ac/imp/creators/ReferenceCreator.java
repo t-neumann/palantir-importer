@@ -17,7 +17,6 @@ import org.jboss.logging.Logger.Level;
 import at.ac.imp.entities.Gene;
 import at.ac.imp.entities.Reference;
 import at.ac.imp.resources.PersistenceProvider;
-import at.ac.imp.util.FileCrawler;
 
 public class ReferenceCreator {
 	
@@ -69,7 +68,7 @@ public class ReferenceCreator {
 		Gene gene = null;
 		
 		if (fields.length > GENEPOS) {
-			gene = new Gene(fields[CHRPOS], Integer.parseInt(fields[STARTPOS]), Integer.parseInt(fields[ENDPOS]), fields[GENEPOS], 0);
+			gene = new Gene(fields[CHRPOS], Integer.parseInt(fields[STARTPOS]), Integer.parseInt(fields[ENDPOS]), fields[GENEPOS], fields[STRANDPOS].equals("-") ? true : false, 0);
 		} else {
 			Logger.getLogger(ReferenceCreator.class).log(Level.WARN, "Line " + line + " contains less than " + GENEPOS + " fields");
 		}

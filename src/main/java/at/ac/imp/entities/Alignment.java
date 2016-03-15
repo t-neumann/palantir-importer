@@ -18,6 +18,24 @@ public class Alignment implements Serializable {
 	
 	@ManyToOne
 	private Reference reference;
+	
+	private String name;
+
+	public Reference getReference() {
+		return reference;
+	}
+
+	public void setReference(Reference reference) {
+		this.reference = reference;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
 
 	public Alignment() {
 		super();

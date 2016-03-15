@@ -11,13 +11,14 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
+import javax.persistence.NamedQuery;
 
 /**
  * Entity implementation class for Entity: Reference
  *
  */
 @Entity
-
+@NamedQuery(name="Reference.findByName",query="SELECT r FROM Reference r WHERE r.name = :name")
 public class Reference implements Serializable {
 	
 	private static final long serialVersionUID = 1L;

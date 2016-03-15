@@ -10,6 +10,7 @@ import java.util.Properties;
 
 import javax.persistence.EntityManager;
 
+import at.ac.imp.creators.CountCreator;
 import at.ac.imp.creators.ReferenceCreator;
 import at.ac.imp.entities.Datapoint;
 import at.ac.imp.entities.ExpressionValue;
@@ -64,6 +65,15 @@ public class Main {
 		
 		ReferenceCreator creater = new ReferenceCreator();
 		creater.createReference(file);
+		
+		List<Path> countFiles = crawler.readFilesFromDirectory(prop.getProperty("rootDir"));
+		
+		CountCreator counter = new CountCreator();
+		
+		for (Path file1 : countFiles) {
+			counter.createCounts(file1);
+			System.out.println(file1.getFileName());
+		}
 		
 		PersistenceProvider.INSTANCE.close();
 		
