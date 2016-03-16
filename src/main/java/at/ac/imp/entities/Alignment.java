@@ -1,6 +1,8 @@
 package at.ac.imp.entities;
 
 import java.io.Serializable;
+
+
 import javax.persistence.*;
 
 /**
@@ -16,17 +18,27 @@ public class Alignment implements Serializable {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private int id;
 	
-	@ManyToOne
-	private Reference reference;
-	
 	private String name;
+	
+	private String build;
+	
+	@ManyToOne
+	private Sample sample;
 
-	public Reference getReference() {
-		return reference;
+	public Sample getSample() {
+		return sample;
 	}
 
-	public void setReference(Reference reference) {
-		this.reference = reference;
+	public void setSample(Sample sample) {
+		this.sample = sample;
+	}
+
+	public String getBuild() {
+		return build;
+	}
+
+	public void setBuild(String build) {
+		this.build = build;
 	}
 
 	public String getName() {
@@ -39,6 +51,11 @@ public class Alignment implements Serializable {
 
 	public Alignment() {
 		super();
+	}
+	public Alignment(String name, String build) {
+		super();
+		this.name = name;
+		this.build = build;
 	}
    
 }

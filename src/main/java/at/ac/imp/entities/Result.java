@@ -16,13 +16,16 @@ import javax.persistence.OneToMany;
  *
  */
 @Entity
-public abstract class Result implements Serializable {
+public class Result implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private int id;
+	
+	@ManyToOne
+	private Alignment alignment;
 	
 	@ManyToOne
 	private Reference reference;
@@ -36,6 +39,14 @@ public abstract class Result implements Serializable {
 
 	public void setReference(Reference reference) {
 		this.reference = reference;
+	}
+	
+	public Alignment getAlignment() {
+		return alignment;
+	}
+
+	public void setAlignment(Alignment alignment) {
+		this.alignment = alignment;
 	}
 
 	public Collection<Datapoint> getDatapoints() {

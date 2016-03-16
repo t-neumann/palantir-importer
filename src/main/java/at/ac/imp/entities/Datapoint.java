@@ -23,7 +23,10 @@ public abstract class Datapoint implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	@ManyToOne
-	private Gene gene;
+	protected Gene gene;
+	
+	@ManyToOne
+	protected Result result;
 
 	public Datapoint() {
 		super();
@@ -36,5 +39,12 @@ public abstract class Datapoint implements Serializable {
 	public void setGene(Gene gene) {
 		this.gene = gene;
 	}
-   
+
+	public Result getResult() {
+		return result;
+	}
+
+	public void setResult(Result result) {
+		this.result = result;
+	}
 }

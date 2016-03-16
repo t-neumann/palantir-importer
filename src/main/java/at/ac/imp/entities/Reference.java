@@ -12,6 +12,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 
 /**
  * Entity implementation class for Entity: Reference
@@ -26,7 +27,7 @@ public class Reference implements Serializable {
 	@Id @GeneratedValue(strategy=GenerationType.AUTO)
 	private int id;
 	
-	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private Collection<Gene> genes = new ArrayList<Gene>();
 	
 	private String name;
@@ -69,6 +70,11 @@ public class Reference implements Serializable {
 		super();
 		this.name = name;
 		this.build = build;
+	}
+
+	@Override
+	public String toString() {
+		return "Reference [name=" + name + ", build=" + build + "]";
 	}
    
 }

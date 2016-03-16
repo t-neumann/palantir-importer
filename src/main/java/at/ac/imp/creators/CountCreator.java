@@ -6,79 +6,133 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
 
 import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
 
 import org.jboss.logging.Logger;
 import org.jboss.logging.Logger.Level;
 
 import at.ac.imp.entities.Alignment;
+import at.ac.imp.entities.Datapoint;
+import at.ac.imp.entities.ExpressionValue;
 import at.ac.imp.entities.Gene;
-import at.ac.imp.entities.RNASeqResult;
 import at.ac.imp.entities.Reference;
+import at.ac.imp.entities.Result;
 import at.ac.imp.entities.Sample;
+import at.ac.imp.exceptions.DatabaseException;
+import at.ac.imp.resources.EntityProvider;
 import at.ac.imp.resources.PersistenceProvider;
 
 public class CountCreator {
 	
-	private static int ALIGNMENT_LEVEL = 3;
-	private static int REFERENCE_LEVEL = 3;
-	private static int SAMPLE_LEVEL = 3;
+	private static final int ALIGNMENT_LEVEL = 3;
+	private static final int REFERENCE_LEVEL = 2;
+	private static final int SAMPLE_LEVEL = 4;
+	private static final int BUILD_LEVEL = 5;
+	
+	private static final int FIELD_LIMIT = 3;
+	
+	private static final int COUNT_FIELD = 1;
 	
 	private EntityManager em;
+	private EntityProvider provider;
 	
 	public CountCreator() {
 		this.em = PersistenceProvider.INSTANCE.getEntityManager();
+		this.provider = new EntityProvider();
 	}
 	
-	public void createCounts(Path referenceFile) {
+	public void createCounts(Path countFile) {
 		// Genome build is parent dir name
-		String reference = referenceFile.getName(referenceFile.getNameCount() - CountCreator.REFERENCE_LEVEL).toString();
 		
-		Alignment alignment = new Alignment();
-		alignment.setName(referenceFile.getName(referenceFile.getNameCount() - CountCreator.ALIGNMENT_LEVEL).toString());
+		String referenceName = countFile.getName(countFile.getNameCount() - CountCreator.REFERENCE_LEVEL).toString();
+		String alignmentName = countFile.getName(countFile.getNameCount() - CountCreator.ALIGNMENT_LEVEL).toString();
+		int sampleId = Integer.parseInt(countFile.getName(countFile.getNameCount() - CountCreator.SAMPLE_LEVEL).toString());
+		String build = countFile.getName(countFile.getNameCount() - CountCreator.BUILD_LEVEL).toString();
 		
-		Sample sample = new Sample(Integer.parseInt(referenceFile.getName(referenceFile.getNameCount() - CountCreator.SAMPLE_LEVEL).toString()));
-		sample.addAlignment(alignment);
+		Sample sample = provider.getSampleById(sampleId);
 		
-		TypedQuery<Reference> query = em.createNamedQuery("Reference.findByName", Reference.class);
-		Reference result = query.setParameter("name", reference).getSingleResult();
+		if (sample == null) {
+			sample = new Sample(sampleId);
+		}
 		
-		System.out.println(result.toString());
-//		Reference reference = new Reference(name, genomeBuild);
-//		
-//		Collection<Gene> genes = readGenes(referenceFile);
-//		
-//		reference.setGenes(genes);
+		Alignment alignment = provider.getAlignmentFromSample(sample, alignmentName);
+		
+		if (alignment == null) {
+			alignment = new Alignment();
+			alignment.setName(countFile.getName(countFile.getNameCount() - CountCreator.ALIGNMENT_LEVEL).toString());
+			alignment.setBuild(build);
+			alignment.setSample(sample);
+			sample.addAlignment(alignment);
+		}
+		
+		Reference reference = null;
+		
+		try {
+			reference = provider.getReferenceByName(referenceName);
+			Result result = new Result();
+			result.setAlignment(alignment);
+			result.setReference(reference);
+			
+			Collection<Datapoint> datapoints = readData(countFile);
+			
+			Iterator<Gene> geneIterator = reference.getGenes().iterator();
+			Iterator<Datapoint> datapointIterator = datapoints.iterator();
+			
+			while(geneIterator.hasNext()) {
+				Gene gene = geneIterator.next();
+				Datapoint datapoint = datapointIterator.next();
+				datapoint.setGene(gene);
+			}
+			
+			if (datapointIterator.hasNext()) {
+				throw new DatabaseException("More genes in countfile than in reference");
+			}
+			
+			for (Datapoint datapoint : datapoints) {
+				System.out.println(datapoint.toString());
+			}
+//			
+//			result.setDatapoints(datapoints);
+			
+			
+		} catch (DatabaseException e) {
+			Logger log = Logger.getLogger(this.getClass());
+			log.log(Level.FATAL, "File " + countFile.toString() + " not added because reference " + referenceName + " not found");
+			log.log(Level.FATAL, e.getMessage());
+		}	
 	}
 	
-	private Collection<Gene> readGenes(Path referenceFile) {
+	private Collection<Datapoint> readData(Path referenceFile) {
 		
-		List<Gene> genes = new ArrayList<Gene>();
+		List<Datapoint> datapoints = new ArrayList<Datapoint>();
 		try (Stream<String> lines = Files.lines(referenceFile, Charset.defaultCharset())) {
-				lines.forEachOrdered(line -> createGeneFromLine(line, genes));
+			// Skip header
+			lines.skip(1L).forEachOrdered(line -> createDatapointFromLine(line, datapoints));
 		} catch (IOException e) {
 			e.getMessage();
 		}
 		
-		return genes;
+		return datapoints;
 	}
 	
-	private void createGeneFromLine(String line, List<Gene> genes) {
+	private void createDatapointFromLine(String line, List<Datapoint> datapoints) {
+
 		String[] fields = line.split("\t");
 		
-		Gene gene = null;
+		Datapoint datapoint = null;
 		
-		if (fields.length > 0) {
+		if (fields.length >= CountCreator.FIELD_LIMIT) {
+			datapoint = new ExpressionValue(Integer.parseInt(fields[CountCreator.COUNT_FIELD]), 0, 0);
 		} else {
-			Logger.getLogger(ReferenceCreator.class).log(Level.WARN, "Line " + line + " contains less than " + 0 + " fields");
+			Logger.getLogger(ReferenceCreator.class).log(Level.WARN, "Line " + line + " contains less than " + 3 + " fields");
 		}
 		
-		if (gene != null) {
-			genes.add(gene);
+		if (datapoint != null) {
+			datapoints.add(datapoint);
 		}
 	}
 

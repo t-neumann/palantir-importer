@@ -1,6 +1,5 @@
 package at.ac.imp;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,16 +7,9 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Properties;
 
-import javax.persistence.EntityManager;
-
 import at.ac.imp.creators.CountCreator;
 import at.ac.imp.creators.ReferenceCreator;
-import at.ac.imp.entities.Datapoint;
-import at.ac.imp.entities.ExpressionValue;
-import at.ac.imp.entities.FoldChange;
-import at.ac.imp.entities.Gene;
-import at.ac.imp.entities.Reference;
-import at.ac.imp.entities.ScreenFoldChange;
+import at.ac.imp.exceptions.DatabaseException;
 import at.ac.imp.resources.PersistenceProvider;
 import at.ac.imp.util.FileCrawler;
 
@@ -61,18 +53,18 @@ public class Main {
 		FileCrawler crawler = new FileCrawler();
 		List<Path> referenceFiles = crawler.readFilesFromDirectory(prop.getProperty("referenceDir"));
 		
-		Path file = referenceFiles.get(0);
+		ReferenceCreator creator = new ReferenceCreator();
 		
-		ReferenceCreator creater = new ReferenceCreator();
-		creater.createReference(file);
+		for (Path file : referenceFiles) {
+			creator.createReference(file);
+		}
 		
 		List<Path> countFiles = crawler.readFilesFromDirectory(prop.getProperty("rootDir"));
 		
 		CountCreator counter = new CountCreator();
 		
-		for (Path file1 : countFiles) {
-			counter.createCounts(file1);
-			System.out.println(file1.getFileName());
+		for (Path file : countFiles) {
+			counter.createCounts(file);
 		}
 		
 		PersistenceProvider.INSTANCE.close();

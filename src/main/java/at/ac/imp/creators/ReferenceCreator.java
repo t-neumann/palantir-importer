@@ -26,6 +26,8 @@ public class ReferenceCreator {
 	private static final int GENEPOS = 8;
 	private static final int STRANDPOS = 6;
 	
+	private static final int FIELD_LIMIT = 9;
+	
 	private EntityManager em;
 	
 	public ReferenceCreator() {
@@ -47,7 +49,6 @@ public class ReferenceCreator {
 		em.persist(reference);
 		em.getTransaction().commit();
 		em.close();
-		
 	}
 	
 	private Collection<Gene> readGenes(Path referenceFile) {
@@ -67,10 +68,10 @@ public class ReferenceCreator {
 		
 		Gene gene = null;
 		
-		if (fields.length > GENEPOS) {
+		if (fields.length >= ReferenceCreator.FIELD_LIMIT) {
 			gene = new Gene(fields[CHRPOS], Integer.parseInt(fields[STARTPOS]), Integer.parseInt(fields[ENDPOS]), fields[GENEPOS], fields[STRANDPOS].equals("-") ? true : false, 0);
 		} else {
-			Logger.getLogger(ReferenceCreator.class).log(Level.WARN, "Line " + line + " contains less than " + GENEPOS + " fields");
+			Logger.getLogger(ReferenceCreator.class).log(Level.WARN, "Line " + line + " contains less than " + ReferenceCreator.FIELD_LIMIT + " fields");
 		}
 		
 		if (gene != null) {

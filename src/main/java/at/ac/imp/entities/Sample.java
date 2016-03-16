@@ -11,6 +11,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 
 /**
  * Entity implementation class for Entity: Sample
@@ -25,7 +26,7 @@ public class Sample implements Serializable {
 	@Id
 	private int id;
 
-	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private Collection<Alignment> alignments = new ArrayList<Alignment>();
 
 	public Sample() {

@@ -54,4 +54,9 @@ public class ExpressionValue extends Datapoint implements Serializable {
 		this.tpm = tpm;
 	}
 
+	@Override
+	public String toString() {
+		return "ExpressionValue [count=" + count + ", rpkm=" + rpkm + ", tpm=" + tpm + ", gene=" + gene + ", result="
+				+ result + "]";
+	}
 }

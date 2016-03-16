@@ -25,6 +25,17 @@ public class Gene implements Serializable {
 	private String geneSymbol;
 	private boolean reverse;
 	private int entrezId;
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	private Reference reference;
+
+	public Reference getReference() {
+		return reference;
+	}
+
+	public void setReference(Reference reference) {
+		this.reference = reference;
+	}
 
 	public String getChr() {
 		return chr;
@@ -88,5 +99,9 @@ public class Gene implements Serializable {
 		this.entrezId = entrezId;
 	}
 
-
+	@Override
+	public String toString() {
+		return "Gene [chr=" + chr + ", start=" + start + ", end=" + end + ", geneSymbol=" + geneSymbol + ", reverse="
+				+ reverse + ", entrezId=" + entrezId + ", reference=" + reference + "]";
+	}
 }
