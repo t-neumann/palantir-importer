@@ -3,20 +3,20 @@ package at.ac.imp.entities;
 import java.io.Serializable;
 import javax.persistence.*;
 
-import at.ac.imp.entities.Datapoint;
-
 /**
  * Entity implementation class for Entity: ExpressionValue
  *
  */
 @Entity
-
+@DiscriminatorValue(value = "ExpressionValue")
 public class ExpressionValue extends Datapoint implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
-
+	
 	private int count;
+	
 	private double rpkm;
+	
 	private double tpm;
 
 	public int getCount() {
