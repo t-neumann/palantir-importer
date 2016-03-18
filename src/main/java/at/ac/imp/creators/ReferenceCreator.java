@@ -21,12 +21,12 @@ import at.ac.imp.resources.PersistenceProvider;
 public class ReferenceCreator {
 	
 	private static final int CHRPOS = 0;
-	private static final int STARTPOS = 3;
-	private static final int ENDPOS = 4;
-	private static final int GENEPOS = 8;
-	private static final int STRANDPOS = 6;
+	private static final int STARTPOS = 1;
+	private static final int ENDPOS = 2;
+	private static final int GENEPOS = 3;
+	private static final int STRANDPOS = 5;
 	
-	private static final int FIELD_LIMIT = 9;
+	private static final int FIELD_LIMIT = 6;
 	
 	private EntityManager em;
 	
@@ -48,7 +48,6 @@ public class ReferenceCreator {
 		em.getTransaction().begin();
 		em.persist(reference);
 		em.getTransaction().commit();
-		em.close();
 	}
 	
 	private Collection<Gene> readGenes(Path referenceFile) {

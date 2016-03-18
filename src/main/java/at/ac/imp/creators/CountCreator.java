@@ -92,12 +92,12 @@ public class CountCreator {
 				throw new DatabaseException("More genes in countfile than in reference");
 			}
 			
-			for (Datapoint datapoint : datapoints) {
-				System.out.println(datapoint.toString());
-			}
-//			
-//			result.setDatapoints(datapoints);
+			result.setDatapoints(datapoints);
 			
+			em.getTransaction().begin();
+			em.persist(sample);
+			em.persist(result);
+			em.getTransaction().commit();			
 			
 		} catch (DatabaseException e) {
 			Logger log = Logger.getLogger(this.getClass());

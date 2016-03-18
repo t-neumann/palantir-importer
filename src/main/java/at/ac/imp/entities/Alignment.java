@@ -22,7 +22,7 @@ public class Alignment implements Serializable {
 	
 	private String build;
 	
-	@ManyToOne
+	@ManyToOne(cascade = CascadeType.MERGE)
 	private Sample sample;
 
 	public Sample getSample() {
