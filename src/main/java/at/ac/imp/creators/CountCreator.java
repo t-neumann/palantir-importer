@@ -73,6 +73,9 @@ public class CountCreator {
 		
 		try {
 			reference = provider.getReferenceByName(referenceName);
+			
+			em.getTransaction().begin();
+			
 			Result result = new Result();
 			result.setAlignment(alignment);
 			result.setReference(reference);
@@ -85,7 +88,9 @@ public class CountCreator {
 			while(geneIterator.hasNext()) {
 				Gene gene = geneIterator.next();
 				Datapoint datapoint = datapointIterator.next();
+				gene.addDatapoint(datapoint);
 				datapoint.setGene(gene);
+				em.merge(gene);
 			}
 			
 			if (datapointIterator.hasNext()) {
@@ -94,7 +99,6 @@ public class CountCreator {
 			
 			result.setDatapoints(datapoints);
 			
-			em.getTransaction().begin();
 			em.persist(sample);
 			em.persist(result);
 			em.getTransaction().commit();			

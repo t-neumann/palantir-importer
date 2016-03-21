@@ -10,7 +10,7 @@ import javax.persistence.*;
  *
  */
 @Entity
-
+@NamedQuery(name="Gene.findByName",query="SELECT g FROM Gene g WHERE g.geneSymbol = :name")
 public class Gene implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
@@ -28,6 +28,21 @@ public class Gene implements Serializable {
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	private Reference reference;
+	
+	@OneToMany(fetch=FetchType.EAGER, cascade=CascadeType.ALL)
+	protected Collection<Datapoint> datapoints;
+
+	public Collection<Datapoint> getDatapoints() {
+		return datapoints;
+	}
+
+	public void setDatapoints(Collection<Datapoint> datapoints) {
+		this.datapoints = datapoints;
+	}
+	
+	public void addDatapoint(Datapoint datapoint) {
+		this.datapoints.add(datapoint);
+	}
 
 	public Reference getReference() {
 		return reference;
