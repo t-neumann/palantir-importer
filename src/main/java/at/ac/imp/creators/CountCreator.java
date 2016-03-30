@@ -19,6 +19,7 @@ import at.ac.imp.entities.Alignment;
 import at.ac.imp.entities.Datapoint;
 import at.ac.imp.entities.ExpressionValue;
 import at.ac.imp.entities.Gene;
+import at.ac.imp.entities.QueueSampleMetaInfo;
 import at.ac.imp.entities.Reference;
 import at.ac.imp.entities.Result;
 import at.ac.imp.entities.Sample;
@@ -57,6 +58,9 @@ public class CountCreator {
 		
 		if (sample == null) {
 			sample = new Sample(sampleId);
+			QueueSampleMetaInfo metainfo = new QueueSampleMetaInfo();
+			metainfo.setSampleId(sampleId);
+			sample.setMetaInfo(metainfo);
 		}
 		
 		Alignment alignment = provider.getAlignmentFromSample(sample, alignmentName);

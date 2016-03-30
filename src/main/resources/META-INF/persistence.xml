@@ -5,15 +5,12 @@
 		<class>at.ac.imp.entities.Gene</class>
 		<class>at.ac.imp.entities.ExpressionValue</class>
 		<class>at.ac.imp.entities.FoldChange</class>
-		<class>at.ac.imp.entities.ScreenFoldChange</class>
 		<class>at.ac.imp.entities.Reference</class>
 		<class>at.ac.imp.entities.Alignment</class>
 		<class>at.ac.imp.entities.Sample</class>
 		<class>at.ac.imp.entities.Experiment</class>
 		<class>at.ac.imp.entities.Result</class>
-		<class>at.ac.imp.entities.RNASeqResult</class>
-		<class>at.ac.imp.entities.PairwiseResult</class>
-		<class>at.ac.imp.entities.ScreenResult</class>
+
 		<properties>
 			<property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost/testdb"/>
 			<property name="javax.persistence.jdbc.user" value="test"/>
