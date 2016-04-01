@@ -8,6 +8,7 @@
 		<class>at.ac.imp.palantir.model.ExpressionValue</class>
 		<class>at.ac.imp.palantir.model.Result</class>
 		<class>at.ac.imp.palantir.model.QueueSampleMetaInfo</class>
+		<class>at.ac.imp.palantir.model.Experiment</class>
 
 		<properties>
 			<property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost/testdb"/>
