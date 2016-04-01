@@ -14,8 +14,8 @@ import javax.persistence.EntityManager;
 import org.jboss.logging.Logger;
 import org.jboss.logging.Logger.Level;
 
-import at.ac.imp.entities.Gene;
-import at.ac.imp.entities.Reference;
+import at.ac.imp.palantir.model.Gene;
+import at.ac.imp.palantir.model.Reference;
 import at.ac.imp.resources.PersistenceProvider;
 
 public class ReferenceCreator {

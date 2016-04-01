@@ -5,10 +5,10 @@ import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 import javax.persistence.TypedQuery;
 
-import at.ac.imp.entities.Alignment;
-import at.ac.imp.entities.Reference;
-import at.ac.imp.entities.Sample;
-import at.ac.imp.exceptions.DatabaseException;
+import at.ac.imp.palantir.exceptions.DatabaseException;
+import at.ac.imp.palantir.model.Alignment;
+import at.ac.imp.palantir.model.Reference;
+import at.ac.imp.palantir.model.Sample;
 
 public class EntityProvider {
 	

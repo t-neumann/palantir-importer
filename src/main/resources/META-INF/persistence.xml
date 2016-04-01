@@ -1,15 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <persistence version="2.1" xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
 	<persistence-unit name="Palantir" transaction-type="RESOURCE_LOCAL">
-		<class>at.ac.imp.entities.Datapoint</class>
-		<class>at.ac.imp.entities.Gene</class>
-		<class>at.ac.imp.entities.ExpressionValue</class>
-		<class>at.ac.imp.entities.FoldChange</class>
-		<class>at.ac.imp.entities.Reference</class>
-		<class>at.ac.imp.entities.Alignment</class>
-		<class>at.ac.imp.entities.Sample</class>
-		<class>at.ac.imp.entities.Experiment</class>
-		<class>at.ac.imp.entities.Result</class>
+		<class>at.ac.imp.palantir.model.Reference</class>
+		<class>at.ac.imp.palantir.model.Gene</class>
+		<class>at.ac.imp.palantir.model.Sample</class>
+		<class>at.ac.imp.palantir.model.Alignment</class>
+		<class>at.ac.imp.palantir.model.ExpressionValue</class>
+		<class>at.ac.imp.palantir.model.Result</class>
+		<class>at.ac.imp.palantir.model.QueueSampleMetaInfo</class>
 
 		<properties>
 			<property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost/testdb"/>

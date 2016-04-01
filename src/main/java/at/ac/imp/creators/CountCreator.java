@@ -15,15 +15,15 @@ import javax.persistence.EntityManager;
 import org.jboss.logging.Logger;
 import org.jboss.logging.Logger.Level;
 
-import at.ac.imp.entities.Alignment;
-import at.ac.imp.entities.Datapoint;
-import at.ac.imp.entities.ExpressionValue;
-import at.ac.imp.entities.Gene;
-import at.ac.imp.entities.QueueSampleMetaInfo;
-import at.ac.imp.entities.Reference;
-import at.ac.imp.entities.Result;
-import at.ac.imp.entities.Sample;
-import at.ac.imp.exceptions.DatabaseException;
+import at.ac.imp.palantir.exceptions.DatabaseException;
+import at.ac.imp.palantir.model.Alignment;
+import at.ac.imp.palantir.model.Datapoint;
+import at.ac.imp.palantir.model.ExpressionValue;
+import at.ac.imp.palantir.model.Gene;
+import at.ac.imp.palantir.model.QueueSampleMetaInfo;
+import at.ac.imp.palantir.model.Reference;
+import at.ac.imp.palantir.model.Result;
+import at.ac.imp.palantir.model.Sample;
 import at.ac.imp.resources.EntityProvider;
 import at.ac.imp.resources.PersistenceProvider;
 
