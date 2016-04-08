@@ -43,6 +43,9 @@ public class ReferenceCreator {
 		
 		Collection<Gene> genes = readGenes(referenceFile);
 		
+		for (Gene gene : genes) {
+			gene.setReference(reference);
+		}
 		reference.setGenes(genes);
 		
 		em.getTransaction().begin();

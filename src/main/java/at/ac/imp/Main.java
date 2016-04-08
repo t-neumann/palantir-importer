@@ -24,6 +24,7 @@ public class Main {
 		ReferenceCreator creator = new ReferenceCreator();
 		
 		for (Path file : referenceFiles) {
+			System.out.println(file);
 			creator.createReference(file);
 		}
 		
@@ -32,6 +33,7 @@ public class Main {
 		CountCreator counter = new CountCreator();
 		
 		for (Path file : countFiles) {
+			System.out.println(file);
 			counter.createCounts(file);
 		}
 		

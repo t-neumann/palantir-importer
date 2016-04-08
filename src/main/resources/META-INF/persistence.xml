@@ -11,14 +11,15 @@
 		<class>at.ac.imp.palantir.model.Experiment</class>
 
 		<properties>
-			<property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost/testdb"/>
+			<property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost/testdb?useSSL=false"/>
 			<property name="javax.persistence.jdbc.user" value="test"/>
 			<property name="javax.persistence.jdbc.password" value=""/>
 			<property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>
 			
 			<!--Hibernate properties-->
-            <!-- <property name="hibernate.show_sql" value="true"/> -->
+            <property name="hibernate.show_sql" value="false"/>
             <property name="hibernate.format_sql" value="true"/>
+            <property name="hibernate.use_sql_comments" value="true"/>
             <property name="hibernate.hbm2ddl.auto" value="create"/>
             <property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect"/>
 		</properties>

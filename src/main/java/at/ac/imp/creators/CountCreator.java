@@ -36,7 +36,7 @@ public class CountCreator {
 	
 	private static final int FIELD_LIMIT = 3;
 	
-	private static final int COUNT_FIELD = 1;
+	private static final int COUNT_FIELD = 2;
 	
 	private EntityManager em;
 	private EntityProvider provider;
@@ -84,6 +84,9 @@ public class CountCreator {
 			result.setAlignment(alignment);
 			result.setReference(reference);
 			
+			em.persist(sample);
+			em.persist(result);
+						
 			Collection<Datapoint> datapoints = readData(countFile);
 			
 			Iterator<Gene> geneIterator = reference.getGenes().iterator();
@@ -94,7 +97,7 @@ public class CountCreator {
 				Datapoint datapoint = datapointIterator.next();
 				gene.addDatapoint(datapoint);
 				datapoint.setGene(gene);
-				em.merge(gene);
+				datapoint.setResult(result);
 			}
 			
 			if (datapointIterator.hasNext()) {
@@ -103,9 +106,7 @@ public class CountCreator {
 			
 			result.setDatapoints(datapoints);
 			
-			em.persist(sample);
-			em.persist(result);
-			em.getTransaction().commit();			
+			em.getTransaction().commit();
 			
 		} catch (DatabaseException e) {
 			Logger log = Logger.getLogger(this.getClass());

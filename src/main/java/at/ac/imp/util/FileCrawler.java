@@ -9,7 +9,6 @@ public class FileCrawler{
 	
 	// Wrapper method around recursion
 	public List<Path> readFilesFromDirectory(String dir) {
-		System.out.println("Reading\t" + dir);
 		List<Path> result = new ArrayList<Path>();
 		
 		listFiles(dir, result);
