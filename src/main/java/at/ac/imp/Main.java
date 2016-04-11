@@ -28,13 +28,32 @@ public class Main {
 			creator.createReference(file);
 		}
 		
+		System.exit(0);
+		
 		List<Path> countFiles = crawler.readFilesFromDirectory(prop.getProperty("rootDir"));
 		
 		CountCreator counter = new CountCreator();
 		
+		boolean foundHuman = false;
+		boolean foundMouse = false;
 		for (Path file : countFiles) {
+			
+			if (file.toString().contains("hg19")) {
+				if (!foundHuman) {
+					foundHuman = true;
+					counter.createCounts(file);
+					
+				}
+			}
+			if (file.toString().contains("mm10")) {
+				if (!foundMouse) {
+					foundMouse = true;
+					counter.createCounts(file);
+					
+				}
+			}
 			System.out.println(file);
-			counter.createCounts(file);
+//			counter.createCounts(file);
 		}
 		
 		PersistenceProvider.INSTANCE.close();

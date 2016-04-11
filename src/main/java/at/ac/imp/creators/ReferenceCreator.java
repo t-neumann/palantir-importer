@@ -71,11 +71,12 @@ public class ReferenceCreator {
 		Gene gene = null;
 		
 		if (fields.length >= ReferenceCreator.FIELD_LIMIT) {
-			gene = new Gene(fields[CHRPOS], Integer.parseInt(fields[STARTPOS]), Integer.parseInt(fields[ENDPOS]), fields[GENEPOS], fields[STRANDPOS].equals("-") ? true : false, 0);
+			//gene = new Gene(fields[CHRPOS], Integer.parseInt(fields[STARTPOS]), Integer.parseInt(fields[ENDPOS]), fields[GENEPOS], fields[STRANDPOS].equals("-") ? true : false, 0);
+			gene = new Gene(fields[CHRPOS], Integer.parseInt(fields[STARTPOS]), Integer.parseInt(fields[ENDPOS]), fields[GENEPOS], fields[STRANDPOS], 0);
 		} else {
 			Logger.getLogger(ReferenceCreator.class).log(Level.WARN, "Line " + line + " contains less than " + ReferenceCreator.FIELD_LIMIT + " fields");
 		}
-		
+				
 		if (gene != null) {
 			genes.add(gene);
 		}

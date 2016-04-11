@@ -6,8 +6,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import javax.persistence.EntityManager;
@@ -36,6 +38,8 @@ public class CountCreator {
 	
 	private static final int FIELD_LIMIT = 3;
 	
+	private static final int GENE_FIELD = 0;
+	private static final int LENGTH_FIELD = 1;
 	private static final int COUNT_FIELD = 2;
 	
 	private EntityManager em;
@@ -48,6 +52,8 @@ public class CountCreator {
 	
 	public void createCounts(Path countFile) {
 		// Genome build is parent dir name
+		
+		em.getTransaction().begin();
 		
 		String referenceName = countFile.getName(countFile.getNameCount() - CountCreator.REFERENCE_LEVEL).toString();
 		String alignmentName = countFile.getName(countFile.getNameCount() - CountCreator.ALIGNMENT_LEVEL).toString();
@@ -76,9 +82,11 @@ public class CountCreator {
 		Reference reference = null;
 		
 		try {
+			System.out.println(referenceName);
 			reference = provider.getReferenceByName(referenceName);
+			System.out.println(reference.getGenes().size());
 			
-			em.getTransaction().begin();
+			//em.getTransaction().begin();
 			
 			Result result = new Result();
 			result.setAlignment(alignment);
@@ -87,24 +95,42 @@ public class CountCreator {
 			em.persist(sample);
 			em.persist(result);
 						
-			Collection<Datapoint> datapoints = readData(countFile);
+			Map<String, ExpressionValue> datapoints = readData(countFile);
 			
-			Iterator<Gene> geneIterator = reference.getGenes().iterator();
-			Iterator<Datapoint> datapointIterator = datapoints.iterator();
+			calculateRPKMs(datapoints.values());
+			calculateTPMs(datapoints.values());
 			
-			while(geneIterator.hasNext()) {
-				Gene gene = geneIterator.next();
-				Datapoint datapoint = datapointIterator.next();
+			if (datapoints.size() != reference.getGenes().size()) {
+				throw new DatabaseException("Different numbers of reads in reference and count file! Read " + datapoints.size() + " vs " + reference.getGenes().size() + " in reference");
+			}
+			
+//			Iterator<Gene> geneIterator = reference.getGenes().iterator();
+//			Iterator<ExpressionValue> datapointIterator = datapoints.iterator();
+			
+			for (Gene gene : reference.getGenes()) {
+				Datapoint datapoint = datapoints.get(gene.getGeneSymbol());
+				em.persist(datapoint);
 				gene.addDatapoint(datapoint);
+				em.merge(gene);
 				datapoint.setGene(gene);
 				datapoint.setResult(result);
 			}
-			
-			if (datapointIterator.hasNext()) {
-				throw new DatabaseException("More genes in countfile than in reference");
-			}
-			
-			result.setDatapoints(datapoints);
+//			while(geneIterator.hasNext()) {
+//				Gene gene = geneIterator.next();
+//				Datapoint datapoint = datapointIterator.next();
+//				em.persist(datapoint);
+//				gene.addDatapoint(datapoint);
+//				em.merge(gene);
+//				datapoint.setGene(gene);
+//				datapoint.setResult(result);
+//			}
+//			
+//			if (datapointIterator.hasNext()) {
+//				throw new DatabaseException("More genes in countfile than in reference");
+//			}
+			@SuppressWarnings("unchecked")
+			Collection<Datapoint> toPut = (Collection<Datapoint>)(Collection<?>)datapoints.values();
+			result.setDatapoints(toPut);
 			
 			em.getTransaction().commit();
 			
@@ -114,10 +140,36 @@ public class CountCreator {
 			log.log(Level.FATAL, e.getMessage());
 		}	
 	}
-	
-	private Collection<Datapoint> readData(Path referenceFile) {
 		
-		List<Datapoint> datapoints = new ArrayList<Datapoint>();
+	private void calculateTPMs(Collection<ExpressionValue> datapoints) {
+		
+		float runningSum = 0.0f;
+		for (ExpressionValue value : datapoints) {
+			value.setTpm((float)value.getCount() / value.getLength());
+			runningSum += value.getTpm();
+		}
+		for (ExpressionValue value : datapoints) {
+			value.setTpm(value.getTpm() / runningSum * 1e6f);
+		}
+		
+	}
+
+	private void calculateRPKMs(Collection<ExpressionValue> datapoints) {
+		float runningSum = 0.0f;
+		for (ExpressionValue value : datapoints) {
+			runningSum += value.getCount();
+			value.setRpkm(value.getCount() * 1e9f / value.getLength());
+		}
+		for (ExpressionValue value : datapoints) {
+			value.setRpkm(value.getRpkm() / runningSum);
+		}
+		
+	}
+
+	private Map<String,ExpressionValue> readData(Path referenceFile) {
+		
+		Map<String, ExpressionValue>  datapoints = new HashMap<String, ExpressionValue>();
+		//List<ExpressionValue> datapoints = new ArrayList<ExpressionValue>();
 		try (Stream<String> lines = Files.lines(referenceFile, Charset.defaultCharset())) {
 			// Skip header
 			lines.skip(1L).forEachOrdered(line -> createDatapointFromLine(line, datapoints));
@@ -128,20 +180,21 @@ public class CountCreator {
 		return datapoints;
 	}
 	
-	private void createDatapointFromLine(String line, List<Datapoint> datapoints) {
+	private void createDatapointFromLine(String line, Map<String, ExpressionValue> datapoints) {
 
 		String[] fields = line.split("\t");
 		
-		Datapoint datapoint = null;
+		ExpressionValue datapoint = null;
 		
 		if (fields.length >= CountCreator.FIELD_LIMIT) {
 			datapoint = new ExpressionValue(Integer.parseInt(fields[CountCreator.COUNT_FIELD]), 0, 0);
+			datapoint.setLength(Integer.parseInt(fields[CountCreator.LENGTH_FIELD]));
 		} else {
 			Logger.getLogger(ReferenceCreator.class).log(Level.WARN, "Line " + line + " contains less than " + 3 + " fields");
 		}
 		
 		if (datapoint != null) {
-			datapoints.add(datapoint);
+			datapoints.put(fields[CountCreator.GENE_FIELD], datapoint);
 		}
 	}
 
