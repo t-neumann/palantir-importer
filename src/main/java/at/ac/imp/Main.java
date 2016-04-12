@@ -27,9 +27,7 @@ public class Main {
 			System.out.println(file);
 			creator.createReference(file);
 		}
-		
-		System.exit(0);
-		
+				
 		List<Path> countFiles = crawler.readFilesFromDirectory(prop.getProperty("rootDir"));
 		
 		CountCreator counter = new CountCreator();
@@ -38,22 +36,23 @@ public class Main {
 		boolean foundMouse = false;
 		for (Path file : countFiles) {
 			
-			if (file.toString().contains("hg19")) {
-				if (!foundHuman) {
-					foundHuman = true;
-					counter.createCounts(file);
-					
-				}
-			}
-			if (file.toString().contains("mm10")) {
-				if (!foundMouse) {
-					foundMouse = true;
-					counter.createCounts(file);
-					
-				}
-			}
+//			if (file.toString().contains("hg19")) {
+//				if (!foundHuman) {
+//					foundHuman = true;
+//					counter.createCounts(file);
+//					
+//				}
+//			}
+//			if (file.toString().contains("mm10")) {
+//				if (!foundMouse) {
+//					//foundMouse = true;
+//					System.out.println(file);
+//					counter.createCounts(file);
+//					
+//				}
+//			}
 			System.out.println(file);
-//			counter.createCounts(file);
+			counter.createCounts(file);
 		}
 		
 		PersistenceProvider.INSTANCE.close();

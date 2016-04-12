@@ -18,6 +18,22 @@ public class EntityProvider {
 		em = PersistenceProvider.INSTANCE.getEntityManager();
 	}
 	
+	public void sessionStart()  {
+		em.getTransaction().begin();
+	}
+	
+	public void sessionEnd()  {
+		em.getTransaction().commit();
+	}
+	
+	public void persist(Object entity) {
+		em.persist(entity);
+	}
+	
+	public void merge(Object entity) {
+		em.merge(entity);
+	}
+	
 	public Reference getReferenceByName(String name) throws DatabaseException {
 		TypedQuery<Reference> query = em.createNamedQuery("Reference.findByName", Reference.class);
 		Reference result = null;

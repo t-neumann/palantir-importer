@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 
 import javax.persistence.EntityManager;
 
+import org.hibernate.engine.transaction.jta.platform.internal.SynchronizationRegistryBasedSynchronizationStrategy;
 import org.jboss.logging.Logger;
 import org.jboss.logging.Logger.Level;
 

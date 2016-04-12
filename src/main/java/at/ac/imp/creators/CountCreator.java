@@ -42,18 +42,19 @@ public class CountCreator {
 	private static final int LENGTH_FIELD = 1;
 	private static final int COUNT_FIELD = 2;
 	
-	private EntityManager em;
+	//private EntityManager em;
 	private EntityProvider provider;
 	
 	public CountCreator() {
-		this.em = PersistenceProvider.INSTANCE.getEntityManager();
+		//this.em = PersistenceProvider.INSTANCE.getEntityManager();
 		this.provider = new EntityProvider();
 	}
 	
 	public void createCounts(Path countFile) {
 		// Genome build is parent dir name
 		
-		em.getTransaction().begin();
+		provider.sessionStart();
+		//em.getTransaction().begin();
 		
 		String referenceName = countFile.getName(countFile.getNameCount() - CountCreator.REFERENCE_LEVEL).toString();
 		String alignmentName = countFile.getName(countFile.getNameCount() - CountCreator.ALIGNMENT_LEVEL).toString();
@@ -82,9 +83,7 @@ public class CountCreator {
 		Reference reference = null;
 		
 		try {
-			System.out.println(referenceName);
 			reference = provider.getReferenceByName(referenceName);
-			System.out.println(reference.getGenes().size());
 			
 			//em.getTransaction().begin();
 			
@@ -92,9 +91,11 @@ public class CountCreator {
 			result.setAlignment(alignment);
 			result.setReference(reference);
 			
-			em.persist(sample);
-			em.persist(result);
-						
+			//em.persist(sample);
+			//em.persist(result);
+			provider.persist(sample);
+			provider.persist(result);
+									
 			Map<String, ExpressionValue> datapoints = readData(countFile);
 			
 			calculateRPKMs(datapoints.values());
@@ -109,9 +110,11 @@ public class CountCreator {
 			
 			for (Gene gene : reference.getGenes()) {
 				Datapoint datapoint = datapoints.get(gene.getGeneSymbol());
-				em.persist(datapoint);
+				//em.persist(datapoint);
+				provider.persist(datapoint);
 				gene.addDatapoint(datapoint);
-				em.merge(gene);
+				//em.merge(gene);
+				provider.merge(gene);
 				datapoint.setGene(gene);
 				datapoint.setResult(result);
 			}
@@ -132,7 +135,8 @@ public class CountCreator {
 			Collection<Datapoint> toPut = (Collection<Datapoint>)(Collection<?>)datapoints.values();
 			result.setDatapoints(toPut);
 			
-			em.getTransaction().commit();
+			//em.getTransaction().commit();
+			provider.sessionEnd();
 			
 		} catch (DatabaseException e) {
 			Logger log = Logger.getLogger(this.getClass());
