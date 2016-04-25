@@ -24,6 +24,7 @@
 			<groupId>at.ac.imp</groupId>
 			<artifactId>palantir</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
+			<classifier>classes</classifier>
 		</dependency>
 		<dependency>
 			<groupId>org.hibernate.javax.persistence</groupId>
@@ -47,23 +48,47 @@
 		</dependency>
 	</dependencies>
 	<properties>
+		<maven-compiler-plugin-version>2.6</maven-compiler-plugin-version>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 	</properties>
 	<build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <configuration>
-          <archive>
-            <manifest>
-              <addClasspath>true</addClasspath>
-              <mainClass>at.ac.imp.Main</mainClass>
-            </manifest>
-          </archive>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>at.ac.imp.Main</mainClass>
+						</manifest>
+					</archive>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+				</configuration>
+				<executions>
+					<execution>
+						<id>make-jar-with-dependencies</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+
+		<!--<plugins> <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-dependency-plugin</artifactId> 
+			<executions> <execution> <id>copy-dependencies</id> <phase>prepare-package</phase> 
+			<goals> <goal>copy-dependencies</goal> </goals> <configuration> <outputDirectory>target/lib</outputDirectory> 
+			<overWriteReleases>false</overWriteReleases> <overWriteSnapshots>false</overWriteSnapshots> 
+			<overWriteIfNewer>true</overWriteIfNewer> </configuration> </execution> </executions> 
+			</plugin> <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-jar-plugin</artifactId> 
+			<version>${maven-compiler-plugin-version}</version> <configuration> <outputDirectory>target</outputDirectory> 
+			<archive> <manifest> <addClasspath>true</addClasspath> <classpathPrefix>lib</classpathPrefix> 
+			<mainClass>at.ac.imp.Main</mainClass> </manifest> </archive> </configuration> 
+			</plugin> </plugins> -->
+	</build>
 </project>
