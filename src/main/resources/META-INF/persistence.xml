@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<persistence version="2.1" xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
+<persistence version="2.1"
+	xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
 	<persistence-unit name="Palantir" transaction-type="RESOURCE_LOCAL">
+
+		<provider>org.hibernate.ejb.HibernatePersistence</provider>
+
 		<class>at.ac.imp.palantir.model.Reference</class>
 		<class>at.ac.imp.palantir.model.Gene</class>
 		<class>at.ac.imp.palantir.model.Sample</class>
@@ -11,17 +16,21 @@
 		<class>at.ac.imp.palantir.model.Experiment</class>
 
 		<properties>
-			<property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost/testdb?useSSL=false"/>
-			<property name="javax.persistence.jdbc.user" value="test"/>
-			<property name="javax.persistence.jdbc.password" value=""/>
-			<property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>
-			
-			<!-- Hibernate properties
-            <property name="hibernate.show_sql" value="false"/>
-            <property name="hibernate.format_sql" value="true"/>
-            <property name="hibernate.use_sql_comments" value="true"/>
-            <property name="hibernate.hbm2ddl.auto" value="create"/>
-            <property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect"/>-->
+
+			<property name="javax.persistence.jdbc.url"
+				value="jdbc:mysql://localhost/palantir_dev?useSSL=false" />
+			<property name="javax.persistence.jdbc.user" value="test" />
+			<property name="javax.persistence.jdbc.password" value="" />
+			<property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver" />
+			<!-- <property name="javax.persistence.jdbc.url" value="jdbc:mysql://web-zuber-dev.imp.ac.at/palantir_dev?useSSL=false"/> 
+				<property name="javax.persistence.jdbc.user" value="palantir-test"/> <property 
+				name="javax.persistence.jdbc.password" value="friend"/> <property name="javax.persistence.jdbc.driver" 
+				value="com.mysql.jdbc.Driver"/> -->
+
+			<!-- Hibernate properties <property name="hibernate.show_sql" value="false"/> 
+				<property name="hibernate.format_sql" value="true"/> <property name="hibernate.use_sql_comments" 
+				value="true"/> <property name="hibernate.hbm2ddl.auto" value="create"/> <property 
+				name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect"/> -->
 		</properties>
 	</persistence-unit>
 </persistence>

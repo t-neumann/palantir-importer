@@ -4,17 +4,14 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-import javax.persistence.EntityManager;
+import org.hibernate.Hibernate;
 
 import at.ac.imp.palantir.exceptions.DatabaseException;
 import at.ac.imp.palantir.model.Alignment;
@@ -27,7 +24,6 @@ import at.ac.imp.palantir.model.Result;
 import at.ac.imp.palantir.model.Sample;
 import at.ac.imp.palantir.util.QueueSampleInfoRetreiverBean;
 import at.ac.imp.resources.EntityProvider;
-import at.ac.imp.resources.PersistenceProvider;
 
 public class CountCreator {
 
@@ -44,6 +40,8 @@ public class CountCreator {
 
 	// private EntityManager em;
 	private EntityProvider provider;
+	
+	private Map<String, Reference> referenceMap = new HashMap<String, Reference>();
 
 	public CountCreator() {
 		// this.em = PersistenceProvider.INSTANCE.getEntityManager();
@@ -91,7 +89,13 @@ public class CountCreator {
 		Reference reference = null;
 
 		try {
-			reference = provider.getReferenceByName(referenceName);
+			if (!referenceMap.containsKey(referenceName)) {
+				reference = provider.getReferenceByName(referenceName);
+				Hibernate.initialize(reference);
+				referenceMap.put(referenceName, reference);
+			} else {
+				reference = referenceMap.get(referenceName);
+			}
 
 			// em.getTransaction().begin();
 
@@ -126,9 +130,9 @@ public class CountCreator {
 					Datapoint datapoint = datapoints.get(gene.getGeneSymbol());
 					// em.persist(datapoint);
 					provider.persist(datapoint);
-					gene.addDatapoint(datapoint);
+					//gene.addDatapoint(datapoint);
 					// em.merge(gene);
-					provider.merge(gene);
+					//provider.merge(gene);
 					datapoint.setGene(gene);
 					datapoint.setResult(result);
 				}
