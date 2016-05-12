@@ -35,8 +35,8 @@ public class CountCreator {
 	private static final int FIELD_LIMIT = 3;
 
 	private static final int GENE_FIELD = 0;
-	private static final int LENGTH_FIELD = 1;
-	private static final int COUNT_FIELD = 2;
+	private static final int LENGTH_FIELD = 5;
+	private static final int COUNT_FIELD = 6;
 
 	// private EntityManager em;
 	private EntityProvider provider;
@@ -117,7 +117,7 @@ public class CountCreator {
 				calculateTPMs(datapoints.values());
 
 				if (datapoints.size() != reference.getGenes().size()) {
-					throw new DatabaseException("Different numbers of reads in reference and count file! Read "
+					throw new DatabaseException("Different numbers of genes in reference and count file! Read "
 							+ datapoints.size() + " vs " + reference.getGenes().size() + " in reference");
 				}
 
@@ -127,7 +127,7 @@ public class CountCreator {
 				// datapoints.iterator();
 
 				for (Gene gene : reference.getGenes()) {
-					Datapoint datapoint = datapoints.get(gene.getGeneSymbol());
+					Datapoint datapoint = datapoints.get(gene.getEntrezId());
 					// em.persist(datapoint);
 					provider.persist(datapoint);
 					//gene.addDatapoint(datapoint);
@@ -197,7 +197,7 @@ public class CountCreator {
 		// List<ExpressionValue> datapoints = new ArrayList<ExpressionValue>();
 		try (Stream<String> lines = Files.lines(referenceFile, Charset.defaultCharset())) {
 			// Skip header
-			lines.skip(1L).forEachOrdered(line -> createDatapointFromLine(line, datapoints));
+			lines.skip(2L).forEachOrdered(line -> createDatapointFromLine(line, datapoints));
 		} catch (IOException e) {
 			e.getMessage();
 		}
@@ -206,7 +206,6 @@ public class CountCreator {
 	}
 
 	private void createDatapointFromLine(String line, Map<String, ExpressionValue> datapoints) {
-
 		String[] fields = line.split("\t");
 
 		ExpressionValue datapoint = null;

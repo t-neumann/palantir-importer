@@ -20,10 +20,12 @@ public class ReferenceCreator {
 	private static final int CHRPOS = 0;
 	private static final int STARTPOS = 1;
 	private static final int ENDPOS = 2;
-	private static final int GENEPOS = 3;
+	private static final int IDPOS = 3;
 	private static final int STRANDPOS = 5;
+	private static final int GENESYMBOLPOS = 6;
+	private static final int ANNOPOS = 7;
 
-	private static final int FIELD_LIMIT = 6;
+	private static final int FIELD_LIMIT = 7;
 
 	private EntityProvider provider;
 
@@ -77,12 +79,18 @@ public class ReferenceCreator {
 		Gene gene = null;
 
 		if (fields.length >= ReferenceCreator.FIELD_LIMIT) {
+			
+			String anno = "";
+			
+			if (fields.length >= (ReferenceCreator.FIELD_LIMIT + 1)) {
+				anno = fields[ANNOPOS];
+			}
 			// gene = new Gene(fields[CHRPOS],
 			// Integer.parseInt(fields[STARTPOS]),
 			// Integer.parseInt(fields[ENDPOS]), fields[GENEPOS],
 			// fields[STRANDPOS].equals("-") ? true : false, 0);
 			gene = new Gene(fields[CHRPOS], Integer.parseInt(fields[STARTPOS]), Integer.parseInt(fields[ENDPOS]),
-					fields[GENEPOS], fields[STRANDPOS], 0);
+					fields[GENESYMBOLPOS], fields[STRANDPOS], fields[IDPOS], anno);
 		} else {
 			Logger.getAnonymousLogger().log(Level.WARNING, "Line " + line + " contains less than " + ReferenceCreator.FIELD_LIMIT + " fields");
 		}

@@ -67,17 +67,19 @@ public class Main {
 			i = 1;
 
 			for (Path file : countFiles) {
-				System.out.println("Countfile " + i + " out of " + countFiles.size());
-				System.out.println(file);
-
-				long startTime = System.currentTimeMillis();
-
-				counter.createCounts(file);
-
-				long endTime = System.currentTimeMillis();
-
-				System.out.println("Database import took " + (endTime - startTime) / 1000 + " seconds");
-				++i;
+				if (!file.getFileName().endsWith(".summary")) {
+					System.out.println("Countfile " + i + " out of " + countFiles.size());
+					System.out.println(file);
+	
+					long startTime = System.currentTimeMillis();
+	
+					counter.createCounts(file);
+	
+					long endTime = System.currentTimeMillis();
+	
+					System.out.println("Database import took " + (endTime - startTime) / 1000 + " seconds");
+					++i;
+				}
 			}
 
 			PersistenceProvider.INSTANCE.close();
