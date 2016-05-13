@@ -60,26 +60,24 @@ public class Main {
 			}
 
 			//List<Path> countFiles = crawler.readFilesFromDirectory(prop.getProperty("rootDir"));
-			List<Path> countFiles = crawler.readFilesFromDirectory(options.valueOf(rootDirPar));
+			List<Path> countFiles = crawler.readFilesFromDirectory(options.valueOf(rootDirPar), "summary");
 
 			CountCreator counter = new CountCreator();
 
 			i = 1;
 
 			for (Path file : countFiles) {
-				if (!file.getFileName().endsWith(".summary")) {
-					System.out.println("Countfile " + i + " out of " + countFiles.size());
-					System.out.println(file);
-	
-					long startTime = System.currentTimeMillis();
-	
-					counter.createCounts(file);
-	
-					long endTime = System.currentTimeMillis();
-	
-					System.out.println("Database import took " + (endTime - startTime) / 1000 + " seconds");
-					++i;
-				}
+				System.out.println("Countfile " + i + " out of " + countFiles.size());
+				System.out.println(file);
+
+				long startTime = System.currentTimeMillis();
+
+				counter.createCounts(file);
+
+				long endTime = System.currentTimeMillis();
+
+				System.out.println("Database import took " + (endTime - startTime) / 1000 + " seconds");
+				++i;
 			}
 
 			PersistenceProvider.INSTANCE.close();

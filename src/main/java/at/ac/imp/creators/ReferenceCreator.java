@@ -26,6 +26,8 @@ public class ReferenceCreator {
 	private static final int ANNOPOS = 7;
 
 	private static final int FIELD_LIMIT = 7;
+	
+	private static int MAX_STRING_SIZE = 255;
 
 	private EntityProvider provider;
 
@@ -83,14 +85,17 @@ public class ReferenceCreator {
 			String anno = "";
 			
 			if (fields.length >= (ReferenceCreator.FIELD_LIMIT + 1)) {
-				anno = fields[ANNOPOS];
+				anno = fields[ReferenceCreator.ANNOPOS];
 			}
 			// gene = new Gene(fields[CHRPOS],
 			// Integer.parseInt(fields[STARTPOS]),
 			// Integer.parseInt(fields[ENDPOS]), fields[GENEPOS],
 			// fields[STRANDPOS].equals("-") ? true : false, 0);
-			gene = new Gene(fields[CHRPOS], Integer.parseInt(fields[STARTPOS]), Integer.parseInt(fields[ENDPOS]),
-					fields[GENESYMBOLPOS], fields[STRANDPOS], fields[IDPOS], anno);
+			if (anno.length() > ReferenceCreator.MAX_STRING_SIZE) {
+				anno = anno.substring(0, ReferenceCreator.MAX_STRING_SIZE);
+			}
+			gene = new Gene(fields[ReferenceCreator.CHRPOS], Integer.parseInt(fields[ReferenceCreator.STARTPOS]), Integer.parseInt(fields[ReferenceCreator.ENDPOS]),
+					fields[ReferenceCreator.GENESYMBOLPOS], fields[ReferenceCreator.STRANDPOS], fields[ReferenceCreator.IDPOS], anno);
 		} else {
 			Logger.getAnonymousLogger().log(Level.WARNING, "Line " + line + " contains less than " + ReferenceCreator.FIELD_LIMIT + " fields");
 		}
