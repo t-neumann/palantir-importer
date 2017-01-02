@@ -1,17 +1,29 @@
 package at.ac.imp;
 
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.hibernate.cfg.Configuration;
+import org.primefaces.json.JSONObject;
+import org.primefaces.json.JSONTokener;
 
 import at.ac.imp.creators.CountCreator;
+import at.ac.imp.creators.ExternalRNASeqImporter;
 import at.ac.imp.creators.ReferenceCreator;
+import at.ac.imp.palantir.model.ExternalRNASeqResource;
 import at.ac.imp.resources.PersistenceProvider;
 import at.ac.imp.util.FileCrawler;
 import joptsimple.OptionParser;
@@ -21,18 +33,20 @@ import joptsimple.OptionSpec;
 public class Main {
 
 	public static void main(String[] args) {
-
+				
 		OptionParser optionParser = new OptionParser();
 
 		optionParser.accepts("f", "Force database reset");
 		OptionSpec<String> rootDirPar = optionParser.accepts("r", "Root directory").withRequiredArg()
+				.ofType(String.class);
+		OptionSpec<String> externalRNASeqDirPar = optionParser.accepts("e", "external RNASeq directory").withRequiredArg()
 				.ofType(String.class);
 
 		OptionSpec<?> help = optionParser.acceptsAll(Arrays.asList(new String[] { "?", "h", "help" }), "Show help");
 
 		OptionSet options = optionParser.parse(args);
 
-		if (!options.has(help) && options.has(rootDirPar)) {
+		if (!options.has(help) && options.has(rootDirPar) && options.has(externalRNASeqDirPar)) {
 
 			boolean force = options.has("f"); 
 			Properties prop = readProperties();
@@ -60,7 +74,7 @@ public class Main {
 			}
 
 			//List<Path> countFiles = crawler.readFilesFromDirectory(prop.getProperty("rootDir"));
-			List<Path> countFiles = crawler.readFilesFromDirectory(options.valueOf(rootDirPar), "summary");
+			List<Path> countFiles = crawler.readFilesFromDirectory(options.valueOf(rootDirPar), "summary", true);
 
 			CountCreator counter = new CountCreator();
 
@@ -78,6 +92,15 @@ public class Main {
 
 				System.out.println("Database import took " + (endTime - startTime) / 1000 + " seconds");
 				++i;
+			}
+			
+			// Read external RNASeq data
+			List<Path> externalRNASeqFiles = crawler.readFilesFromDirectory(options.valueOf(externalRNASeqDirPar), "rpkms", false);
+			
+			ExternalRNASeqImporter externalRNASeqImporter = new ExternalRNASeqImporter();
+			
+			for (Path file : externalRNASeqFiles) {
+				externalRNASeqImporter.createCounts(file);
 			}
 
 			PersistenceProvider.INSTANCE.close();

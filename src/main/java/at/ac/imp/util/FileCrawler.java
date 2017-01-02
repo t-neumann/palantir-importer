@@ -9,27 +9,29 @@ public class FileCrawler {
 
 	// Wrapper to select all files (no file will contain tab)
 	public List<Path> readFilesFromDirectory(String dir) {
-		return readFilesFromDirectory(dir, "\t");
+		return readFilesFromDirectory(dir, "\t", true);
 	}
 
 	// Wrapper method around recursion
-	public List<Path> readFilesFromDirectory(String dir, String ignore) {
+	public List<Path> readFilesFromDirectory(String dir, String pattern, boolean ignore) {
 		List<Path> result = new ArrayList<Path>();
 
-		listFiles(dir, result, ignore);
+		listFiles(dir, result, pattern, ignore);
 
 		return result;
 	}
 
-	private void listFiles(String directoryName, List<Path> files, String ignore) {
+	private void listFiles(String directoryName, List<Path> files, String pattern, boolean ignore) {
 		File directory = new File(directoryName);
 
 		File[] fileList = directory.listFiles();
 		for (File file : fileList) {
-			if (file.isFile() && !file.getName().contains(ignore)) {
+			if (file.isFile() && (ignore && !file.getName().contains(pattern))) {
+				files.add(file.toPath());
+			} else if (file.isFile() && (!ignore && file.getName().contains(pattern))) {
 				files.add(file.toPath());
 			} else if (file.isDirectory()) {
-				listFiles(file.getAbsolutePath(), files, ignore);
+				listFiles(file.getAbsolutePath(), files, pattern, ignore);
 			}
 		}
 	}
