@@ -86,7 +86,7 @@ public class Main {
 
 				long startTime = System.currentTimeMillis();
 
-				counter.createCounts(file);
+				//counter.createCounts(file);
 
 				long endTime = System.currentTimeMillis();
 

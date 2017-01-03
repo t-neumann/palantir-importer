@@ -9,34 +9,74 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Stream;
 
+import javax.persistence.TypedQuery;
+
+import at.ac.imp.palantir.exceptions.DatabaseException;
 import at.ac.imp.palantir.model.ExternalRNASeqDatapoint;
+import at.ac.imp.palantir.model.ExternalRNASeqEntry;
 import at.ac.imp.palantir.model.ExternalRNASeqResource;
+import at.ac.imp.palantir.model.Gene;
+import at.ac.imp.palantir.model.Reference;
+import at.ac.imp.palantir.model.Sample;
 import at.ac.imp.resources.EntityProvider;
 
 public class ExternalRNASeqImporter {
+	
+	private int counter = 0;
 
-	// private EntityManager em;
 	private EntityProvider provider;
 
-	private ExternalRNASeqResource[] resourcePosArray;
+	private ExternalRNASeqEntry[] resourcePosArray;
 
 	public ExternalRNASeqImporter() {
 		this.provider = new EntityProvider();
 	}
 
 	public void createCounts(Path countFile) {
-		readData(countFile);
+		
+		provider.sessionStart();
+		
+		ExternalRNASeqResource resource = readData(countFile);
+		
+		linkGenesToResource(resource);
+		
+		provider.sessionEnd();
+	}
+	
+	private void linkGenesToResource (ExternalRNASeqResource resource){
+		List<Reference> references = provider.getAllReferences();
+		
+		for (Reference reference : references) {
+			
+			resource.addReference(reference);
+			
+			Map<String, Gene> geneMap = new HashMap<String, Gene>();
+			for (Gene gene : reference.getGenes()) {
+				geneMap.put(gene.getEntrezId(), gene);
+			}
+						
+			for (ExternalRNASeqEntry entry : resource.getEntries()) {
+				for (ExternalRNASeqDatapoint datapoint : entry.getDatapoints()) {
+					Gene gene = geneMap.get(datapoint.getEntrezId());
+					if (gene != null) {
+						datapoint.addGene(gene);
+					}
+				}
+			}
+		}
 	}
 
-	private Map<String, ExternalRNASeqResource> readData(Path referenceFile) {
-
-		Map<String, ExternalRNASeqResource> datapoints = new HashMap<String, ExternalRNASeqResource>();
-		// List<ExpressionValue> datapoints = new ArrayList<ExpressionValue>();
+	private ExternalRNASeqResource readData(Path referenceFile) {
+		
+		ExternalRNASeqResource resource = new ExternalRNASeqResource();
+		
+		resource.setName(referenceFile.getFileName().toString());
+		
+		provider.persist(resource);
 
 		try {
 			
@@ -44,11 +84,12 @@ public class ExternalRNASeqImporter {
 			String header = reader.readLine();
 			String[] resources = header.split("\t");
 
-			resourcePosArray = new ExternalRNASeqResource[resources.length - 1];
+			resourcePosArray = new ExternalRNASeqEntry[resources.length - 1];
 
 			for (int i = 1; i < resources.length; ++i) {
-				resourcePosArray[i - 1] = new ExternalRNASeqResource();
+				resourcePosArray[i - 1] = new ExternalRNASeqEntry();
 				resourcePosArray[i - 1].setName(resources[i]);
+				resourcePosArray[i - 1].setResource(resource);
 			}
 
 			Stream<String> lines = Files.lines(referenceFile, Charset.defaultCharset());
@@ -58,22 +99,35 @@ public class ExternalRNASeqImporter {
 			lines.close();
 			reader.close();
 			
+			for (int i = 0; i < resourcePosArray.length; ++i) {
+				resource.addEntry(resourcePosArray[i]);
+			}
+			
+			provider.persist(resource);
+			
 		} catch (IOException e) {
 			e.getMessage();
 		}
 		
-		return datapoints;
+		return resource;
 	}
 
 	private void createDatapointFromLine(String line) {
+		
+		if (counter % 100 == 0 && counter > 0) {
+			System.out.println("ExternalRNASeqImport:\tHandled line " + counter + ".");
+		}
+		
 		String[] fields = line.split("\t");
-		int entrezId = Integer.parseInt(fields[0]);
+		String entrezId = fields[0];
 
 		for (int i = 1; i < fields.length; ++i) {
 			ExternalRNASeqDatapoint datapoint = new ExternalRNASeqDatapoint(entrezId, Float.parseFloat(fields[i]));
+			datapoint.setEntry(resourcePosArray[i - 1]);
 			resourcePosArray[i - 1].addDatapoint(datapoint);
 		}
+		
+		++counter;
 
 	}
-
 }

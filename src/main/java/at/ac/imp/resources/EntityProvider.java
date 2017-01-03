@@ -86,4 +86,12 @@ public class EntityProvider {
 		return result;
 	}
 
+	public List<Reference> getAllReferences() {
+			
+		List<Reference> references = null;
+		TypedQuery<Reference> query = em.createQuery("SELECT r FROM Reference r", Reference.class);
+		references = query.getResultList();
+		
+		return references;
+	}
 }
