@@ -84,12 +84,12 @@ public class ExternalRNASeqImporter {
 			String header = reader.readLine();
 			String[] resources = header.split("\t");
 
-			resourcePosArray = new ExternalRNASeqEntry[resources.length - 1];
+			resourcePosArray = new ExternalRNASeqEntry[resources.length - 2];
 
-			for (int i = 1; i < resources.length; ++i) {
-				resourcePosArray[i - 1] = new ExternalRNASeqEntry();
-				resourcePosArray[i - 1].setName(resources[i]);
-				resourcePosArray[i - 1].setResource(resource);
+			for (int i = 2; i < resources.length; ++i) {
+				resourcePosArray[i - 2] = new ExternalRNASeqEntry();
+				resourcePosArray[i - 2].setName(resources[i]);
+				resourcePosArray[i - 2].setResource(resource);
 			}
 
 			Stream<String> lines = Files.lines(referenceFile, Charset.defaultCharset());
@@ -120,11 +120,13 @@ public class ExternalRNASeqImporter {
 		
 		String[] fields = line.split("\t");
 		String entrezId = fields[0];
+		String geneSymbol = fields[1];
 
-		for (int i = 1; i < fields.length; ++i) {
-			ExternalRNASeqDatapoint datapoint = new ExternalRNASeqDatapoint(entrezId, Float.parseFloat(fields[i]));
-			datapoint.setEntry(resourcePosArray[i - 1]);
-			resourcePosArray[i - 1].addDatapoint(datapoint);
+		for (int i = 2; i < fields.length; ++i) {
+			ExternalRNASeqDatapoint datapoint = new ExternalRNASeqDatapoint(entrezId, geneSymbol, Float.parseFloat(fields[i]));
+			datapoint.setEntry(resourcePosArray[i - 2]);
+			resourcePosArray[i - 2].addDatapoint(datapoint);
+			provider.persist(resourcePosArray[i - 2]);
 		}
 		
 		++counter;
