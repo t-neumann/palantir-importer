@@ -14,6 +14,7 @@
 		<class>at.ac.imp.palantir.model.Result</class>
 		<class>at.ac.imp.palantir.model.QueueSampleMetaInfo</class>
 		<class>at.ac.imp.palantir.model.Experiment</class>
+		<class>at.ac.imp.palantir.model.GenericGene</class>
 		<class>at.ac.imp.palantir.model.ExternalRNASeqResource</class>
 		<class>at.ac.imp.palantir.model.ExternalRNASeqEntry</class>
 		<class>at.ac.imp.palantir.model.ExternalRNASeqDatapoint</class>
