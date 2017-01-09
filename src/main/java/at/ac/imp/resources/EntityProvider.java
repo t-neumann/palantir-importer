@@ -30,6 +30,11 @@ public class EntityProvider {
 	public void sessionEnd() {
 		em.getTransaction().commit();
 	}
+	
+	public void sessionClear() {
+		em.flush();
+		em.clear();
+	}
 
 	public void persist(Object entity) {
 		em.persist(entity);

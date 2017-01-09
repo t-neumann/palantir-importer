@@ -39,13 +39,9 @@ public class ExternalRNASeqImporter {
 
 	public void createCounts(Path countFile) {
 
-		provider.sessionStart();
-
 		ExternalRNASeqResource resource = readData(countFile);
 
 		linkGenesToResource(resource);
-
-		provider.sessionEnd();
 	}
 
 	private void linkGenesToResource(ExternalRNASeqResource resource) {
@@ -72,8 +68,12 @@ public class ExternalRNASeqImporter {
 		ExternalRNASeqResource resource = new ExternalRNASeqResource();
 
 		resource.setName(referenceFile.getFileName().toString());
+		
+		provider.sessionStart();
 
 		provider.persist(resource);
+		
+		provider.sessionEnd();
 
 		try {
 
@@ -82,25 +82,34 @@ public class ExternalRNASeqImporter {
 			String[] resources = header.split("\t");
 
 			resourcePosArray = new ExternalRNASeqEntry[resources.length - 2];
+			
+			provider.sessionStart();
+
 
 			for (int i = 2; i < resources.length; ++i) {
 				resourcePosArray[i - 2] = new ExternalRNASeqEntry();
 				resourcePosArray[i - 2].setName(resources[i]);
 				resourcePosArray[i - 2].setResource(resource);
+				resource.addEntry(resourcePosArray[i - 2]);
 			}
+			
+			provider.persist(resource);
+
+			provider.sessionEnd();			
 
 			Stream<String> lines = Files.lines(referenceFile, Charset.defaultCharset());
 
+			provider.sessionStart();
 			lines.skip(1L).forEachOrdered(line -> createDatapointFromLine(resource, line));
+			provider.persist(resource);
+			provider.sessionEnd();
 
 			lines.close();
 			reader.close();
 
-			for (int i = 0; i < resourcePosArray.length; ++i) {
-				resource.addEntry(resourcePosArray[i]);
-			}
-
-			provider.persist(resource);
+//			for (int i = 0; i < resourcePosArray.length; ++i) {
+//				resource.addEntry(resourcePosArray[i]);
+//			}
 
 		} catch (IOException e) {
 			e.getMessage();
@@ -110,9 +119,15 @@ public class ExternalRNASeqImporter {
 	}
 
 	private void createDatapointFromLine(ExternalRNASeqResource resource, String line) {
-
-		if (counter % 10 == 0 && counter > 0) {
+		
+		if (counter % 1000 == 0 && counter > 0) {
 			System.out.println("ExternalRNASeqImport:\tHandled line " + counter + ".");
+			
+			provider.persist(resource);
+						
+			provider.sessionEnd();
+			
+			provider.sessionStart();
 		}
 
 		String[] fields = line.split("\t");
@@ -122,6 +137,7 @@ public class ExternalRNASeqImporter {
 		GenericGene gene = new GenericGene(entrezId, geneSymbol);
 
 		resource.addGenericGene(gene);
+		//provider.persist(gene);
 
 		for (int i = 2; i < fields.length; ++i) {
 			ExternalRNASeqDatapoint datapoint = new ExternalRNASeqDatapoint(Float.parseFloat(fields[i]));
@@ -133,6 +149,7 @@ public class ExternalRNASeqImporter {
 		}
 
 		++counter;
+		
 
 	}
 }

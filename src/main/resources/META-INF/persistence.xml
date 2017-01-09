@@ -15,9 +15,13 @@
 		<class>at.ac.imp.palantir.model.QueueSampleMetaInfo</class>
 		<class>at.ac.imp.palantir.model.Experiment</class>
 		<class>at.ac.imp.palantir.model.GenericGene</class>
+		<class>at.ac.imp.palantir.model.ScreenGene</class>
 		<class>at.ac.imp.palantir.model.ExternalRNASeqResource</class>
 		<class>at.ac.imp.palantir.model.ExternalRNASeqEntry</class>
 		<class>at.ac.imp.palantir.model.ExternalRNASeqDatapoint</class>
+		<class>at.ac.imp.palantir.model.Essentialome</class>
+		<class>at.ac.imp.palantir.model.EssentialomeEntry</class>
+		<class>at.ac.imp.palantir.model.EssentialomeDatapoint</class>
 
 		<properties>
 

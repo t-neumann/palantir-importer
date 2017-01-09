@@ -21,6 +21,7 @@ import org.primefaces.json.JSONObject;
 import org.primefaces.json.JSONTokener;
 
 import at.ac.imp.creators.CountCreator;
+import at.ac.imp.creators.EssentialomeImporter;
 import at.ac.imp.creators.ExternalRNASeqImporter;
 import at.ac.imp.creators.ReferenceCreator;
 import at.ac.imp.palantir.model.ExternalRNASeqResource;
@@ -39,14 +40,16 @@ public class Main {
 		optionParser.accepts("f", "Force database reset");
 		OptionSpec<String> rootDirPar = optionParser.accepts("r", "Root directory").withRequiredArg()
 				.ofType(String.class);
-		OptionSpec<String> externalRNASeqDirPar = optionParser.accepts("e", "external RNASeq directory").withRequiredArg()
+		OptionSpec<String> publicRNASeqDirPar = optionParser.accepts("p", "public RNASeq directory").withRequiredArg()
+				.ofType(String.class);
+		OptionSpec<String> essentialomeDirPar = optionParser.accepts("e", "essentialome directory").withRequiredArg()
 				.ofType(String.class);
 
 		OptionSpec<?> help = optionParser.acceptsAll(Arrays.asList(new String[] { "?", "h", "help" }), "Show help");
 
 		OptionSet options = optionParser.parse(args);
 
-		if (!options.has(help) && options.has(rootDirPar) && options.has(externalRNASeqDirPar)) {
+		if (!options.has(help) && options.has(rootDirPar) && options.has(publicRNASeqDirPar) && options.has(essentialomeDirPar)) {
 
 			boolean force = options.has("f"); 
 			Properties prop = readProperties();
@@ -95,12 +98,20 @@ public class Main {
 			}
 			
 			// Read external RNASeq data
-			List<Path> externalRNASeqFiles = crawler.readFilesFromDirectory(options.valueOf(externalRNASeqDirPar), "rpkms", false);
+			List<Path> externalRNASeqFiles = crawler.readFilesFromDirectory(options.valueOf(publicRNASeqDirPar), "rpkms", false);
 			
 			ExternalRNASeqImporter externalRNASeqImporter = new ExternalRNASeqImporter();
 			
 			for (Path file : externalRNASeqFiles) {
 				externalRNASeqImporter.createCounts(file);
+			}
+			
+			List<Path> essentialomeFiles = crawler.readFilesFromDirectory(options.valueOf(essentialomeDirPar), ".tsv", false);
+			
+			EssentialomeImporter essentialomeImporter = new EssentialomeImporter();
+			
+			for (Path file : essentialomeFiles) {
+				essentialomeImporter.createCounts(file);
 			}
 
 			PersistenceProvider.INSTANCE.close();
