@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import at.ac.imp.palantir.model.Essentialome;
+import at.ac.imp.palantir.model.EssentialomeDatapoint;
 import at.ac.imp.palantir.model.EssentialomeEntry;
 import at.ac.imp.palantir.model.ExternalRNASeqDatapoint;
 import at.ac.imp.palantir.model.ExternalRNASeqEntry;
@@ -25,11 +26,13 @@ import at.ac.imp.resources.EntityProvider;
 
 public class EssentialomeImporter {
 	
+	private static final int ESSENTIALOME_START = 7;
+	
 	private int counter = 0;
 
 	private EntityProvider provider;
 
-	private ExternalRNASeqEntry[] resourcePosArray;
+	private List<EssentialomeEntry> entries;
 
 	public EssentialomeImporter() {
 		this.provider = new EntityProvider();
@@ -39,7 +42,13 @@ public class EssentialomeImporter {
 
 		Essentialome essentialome = readData(countFile);
 
-		//linkGenesToEssentialome(essentialome);
+		provider.sessionStart();
+		
+		linkGenesToEssentialome(essentialome);
+		
+		provider.persist(essentialome);
+		
+		provider.sessionEnd();
 	}
 
 	private void linkGenesToEssentialome(Essentialome essentialome) {
@@ -61,51 +70,44 @@ public class EssentialomeImporter {
 		}
 	}
 
-	private Essentialome readData(Path referenceFile) {
+	private Essentialome readData(Path inputFile) {
 
 		Essentialome essentialome = new Essentialome();
 
-		essentialome.setName(referenceFile.getFileName().toString());
-		
-//		provider.sessionStart();
-//
-//		provider.persist(essentialome);
-//		
-//		provider.sessionEnd();
+		essentialome.setName(inputFile.getFileName().toString());
 
 		try {
 
-			BufferedReader reader = new BufferedReader(new FileReader(referenceFile.toString()));
+			BufferedReader reader = new BufferedReader(new FileReader(inputFile.toString()));
 			String header = reader.readLine();
 			String[] resources = header.split("\t");
 			
-			List<EssentialomeEntry> entries = new ArrayList<EssentialomeEntry>();			
+			entries = new ArrayList<EssentialomeEntry>();
+						
+			provider.sessionStart();
+			
+			for (int i = EssentialomeImporter.ESSENTIALOME_START; i < resources.length; ++i) {
+				EssentialomeEntry entry = new EssentialomeEntry();
+				entry.setName(resources[i]);
+				entry.setEssentialome(essentialome);
+				essentialome.addEntry(entry);
+				entries.add(entry);
+			}
+		
+			provider.persist(essentialome);
+			
+			provider.sessionEnd();
+			
+			Stream<String> lines = Files.lines(inputFile, Charset.defaultCharset());
 
-//			resourcePosArray = new ExternalRNASeqEntry[resources.length - 2];
-//			
-//			provider.sessionStart();
-//
-//
-//			for (int i = 2; i < resources.length; ++i) {
-//				resourcePosArray[i - 2] = new ExternalRNASeqEntry();
-//				resourcePosArray[i - 2].setName(resources[i]);
-//				resourcePosArray[i - 2].setResource(essentialome);
-//				essentialome.addEntry(resourcePosArray[i - 2]);
-//			}
-//			
-//			provider.persist(essentialome);
-//
-//			provider.sessionEnd();			
-//
-//			Stream<String> lines = Files.lines(referenceFile, Charset.defaultCharset());
-//
-//			provider.sessionStart();
-//			lines.skip(1L).forEachOrdered(line -> createDatapointFromLine(essentialome, line));
-//			provider.persist(essentialome);
-//			provider.sessionEnd();
-//
-//			lines.close();
-//			reader.close();
+			provider.sessionStart();
+			lines.skip(1L).forEachOrdered(line -> createDatapointFromLine(essentialome, line));
+			provider.persist(essentialome);
+			provider.sessionEnd();
+
+			
+			lines.close();
+			reader.close();
 
 
 		} catch (IOException e) {
@@ -130,24 +132,32 @@ public class EssentialomeImporter {
 		String[] fields = line.split("\t");
 		String entrezId = fields[0];
 		String geneSymbol = fields[1];
+		String essential = fields[2];
+		String pool = fields[3];
+		String aliases = fields[4];
+		String chrLocation = fields[5];
+		String type = fields[6];
 
-//		GenericGene gene = new GenericGene(entrezId, geneSymbol);
-//
-//		essentialome.addGenericGene(gene);
-//		//provider.persist(gene);
-//
-//		for (int i = 2; i < fields.length; ++i) {
-//			ExternalRNASeqDatapoint datapoint = new ExternalRNASeqDatapoint(Float.parseFloat(fields[i]));
-//			datapoint.setEntry(resourcePosArray[i - 2]);
-//			datapoint.setGene(gene);
-//			gene.addDatapoint(datapoint);
-//			resourcePosArray[i - 2].addDatapoint(datapoint);
-//			//provider.persist(resourcePosArray[i - 2]);
-//		}
+		ScreenGene gene = new ScreenGene(entrezId, geneSymbol, essential, pool, aliases, chrLocation, type);
 
-		++counter;
+		essentialome.addScreenGene(gene);
 		
-
+		for (int i = EssentialomeImporter.ESSENTIALOME_START; i < fields.length; ++i) {
+			String toParse = fields[i];
+			if (toParse.equals("NO")) {
+				toParse = "0";
+			} else if (toParse.equals("YES")) {
+				toParse = "1";
+			}
+			
+			if (!toParse.equals("NA")) {
+				EssentialomeDatapoint datapoint = new EssentialomeDatapoint(Float.parseFloat(toParse));
+				datapoint.setEntry(entries.get(i - EssentialomeImporter.ESSENTIALOME_START));
+				datapoint.setGene(gene);
+				gene.addDatapoint(datapoint);
+				entries.get(i - EssentialomeImporter.ESSENTIALOME_START).addDatapoint(datapoint);
+			}
+		}
+		++counter;
 	}
-
 }
