@@ -140,6 +140,7 @@ public class EssentialomeImporter {
 
 		ScreenGene gene = new ScreenGene(entrezId, geneSymbol, essential, pool, aliases, chrLocation, type);
 
+		gene.setEssentialome(essentialome);
 		essentialome.addScreenGene(gene);
 		
 		for (int i = EssentialomeImporter.ESSENTIALOME_START; i < fields.length; ++i) {
@@ -154,7 +155,7 @@ public class EssentialomeImporter {
 				EssentialomeDatapoint datapoint = new EssentialomeDatapoint(Float.parseFloat(toParse));
 				datapoint.setEntry(entries.get(i - EssentialomeImporter.ESSENTIALOME_START));
 				datapoint.setGene(gene);
-				gene.addDatapoint(datapoint);
+				gene.addDatapoint(entries.get(i - EssentialomeImporter.ESSENTIALOME_START).getName(), datapoint);
 				entries.get(i - EssentialomeImporter.ESSENTIALOME_START).addDatapoint(datapoint);
 			}
 		}
