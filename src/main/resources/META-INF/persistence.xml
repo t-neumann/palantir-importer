@@ -34,7 +34,6 @@
 				<property name="javax.persistence.jdbc.user" value="palantir-test"/> <property 
 				name="javax.persistence.jdbc.password" value="friend"/> <property name="javax.persistence.jdbc.driver" 
 				value="com.mysql.jdbc.Driver"/> -->
-
 			<!-- Hibernate properties <property name="hibernate.show_sql" value="false"/> 
 				<property name="hibernate.format_sql" value="true"/> <property name="hibernate.use_sql_comments" 
 				value="true"/> <property name="hibernate.hbm2ddl.auto" value="create"/> <property 

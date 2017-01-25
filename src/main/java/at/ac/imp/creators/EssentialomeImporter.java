@@ -39,6 +39,8 @@ public class EssentialomeImporter {
 	}
 
 	public void createCounts(Path countFile) {
+		
+		counter = 0;
 
 		Essentialome essentialome = readData(countFile);
 
@@ -49,6 +51,7 @@ public class EssentialomeImporter {
 		provider.persist(essentialome);
 		
 		provider.sessionEnd();
+		
 	}
 
 	private void linkGenesToEssentialome(Essentialome essentialome) {
@@ -73,8 +76,13 @@ public class EssentialomeImporter {
 	private Essentialome readData(Path inputFile) {
 
 		Essentialome essentialome = new Essentialome();
+		
+		String name = inputFile.getFileName().toString();
+		name = name.replaceAll("\\.palantir.*", "");
+		
+		System.out.println("EssentialomeImport:\tImporting essentialome " + name + ".");
 
-		essentialome.setName(inputFile.getFileName().toString());
+		essentialome.setName(name);
 
 		try {
 

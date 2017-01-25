@@ -22,7 +22,6 @@ import at.ac.imp.palantir.model.ExternalRNASeqResource;
 import at.ac.imp.palantir.model.Gene;
 import at.ac.imp.palantir.model.GenericGene;
 import at.ac.imp.palantir.model.Reference;
-import at.ac.imp.palantir.model.Sample;
 import at.ac.imp.resources.EntityProvider;
 
 public class ExternalRNASeqImporter {
@@ -38,13 +37,19 @@ public class ExternalRNASeqImporter {
 	}
 
 	public void createCounts(Path countFile) {
+		
+		counter = 0;
 
 		ExternalRNASeqResource resource = readData(countFile);
 
 		linkGenesToResource(resource);
+		
 	}
 
 	private void linkGenesToResource(ExternalRNASeqResource resource) {
+		
+		provider.sessionStart();
+		
 		List<Reference> references = provider.getAllReferences();
 
 		for (Reference reference : references) {
@@ -61,13 +66,23 @@ public class ExternalRNASeqImporter {
 				}
 			}
 		}
+		
+		provider.merge(resource);
+		
+		provider.sessionEnd();
+		
 	}
 
 	private ExternalRNASeqResource readData(Path referenceFile) {
 
 		ExternalRNASeqResource resource = new ExternalRNASeqResource();
+		
+		String name = referenceFile.getFileName().toString();
+		name = name.replaceAll("\\.palantir.*", "");
+		
+		System.out.println("ExternalRNASeqImport:\tImporting ExternalRNASeqResource " + name + ".");
 
-		resource.setName(referenceFile.getFileName().toString());
+		resource.setName(name);
 		
 		provider.sessionStart();
 
@@ -106,10 +121,6 @@ public class ExternalRNASeqImporter {
 
 			lines.close();
 			reader.close();
-
-//			for (int i = 0; i < resourcePosArray.length; ++i) {
-//				resource.addEntry(resourcePosArray[i]);
-//			}
 
 		} catch (IOException e) {
 			e.getMessage();

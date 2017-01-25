@@ -5,6 +5,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 import javax.persistence.TypedQuery;
@@ -18,17 +19,27 @@ import at.ac.imp.palantir.model.Sample;
 public class EntityProvider {
 
 	private EntityManager em;
+	private EntityTransaction t;
 
 	public EntityProvider() {
 		em = PersistenceProvider.INSTANCE.getEntityManager();
+		t = em.getTransaction();
 	}
 
 	public void sessionStart() {
-		em.getTransaction().begin();
+		if (t.isActive()) {
+			t.commit();
+		}
+		t.begin();
+		
+		//em.getTransaction().begin();
 	}
 
 	public void sessionEnd() {
-		em.getTransaction().commit();
+		if (t.isActive()) {
+			t.commit();
+		}
+		//em.getTransaction().commit();
 	}
 	
 	public void sessionClear() {
@@ -42,6 +53,10 @@ public class EntityProvider {
 
 	public void merge(Object entity) {
 		em.merge(entity);
+	}
+	
+	public void refresh(Object entity) {
+		em.refresh(entity);
 	}
 
 	public Reference getReferenceByName(String name) {

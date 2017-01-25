@@ -81,31 +81,39 @@ public class Main {
 			CountCreator counter = new CountCreator();
 
 			i = 1;
+			
+			int temp_import = 0;
 
 			for (Path file : countFiles) {
+				
+				if (temp_import > 20) {
+					break;
+				}
 				System.out.println("Countfile " + i + " out of " + countFiles.size());
 				System.out.println(file);
 
 				long startTime = System.currentTimeMillis();
 
-				//counter.createCounts(file);
+				counter.createCounts(file);
 
 				long endTime = System.currentTimeMillis();
 
 				System.out.println("Database import took " + (endTime - startTime) / 1000 + " seconds");
 				++i;
+				++ temp_import;
 			}
 			
 			// Read external RNASeq data
-			List<Path> externalRNASeqFiles = crawler.readFilesFromDirectory(options.valueOf(publicRNASeqDirPar), "rpkms", false);
+			List<Path> externalRNASeqFiles = crawler.readFilesFromDirectory(options.valueOf(publicRNASeqDirPar), "palantir.public.rnaseq", false);
 			
-			ExternalRNASeqImporter externalRNASeqImporter = new ExternalRNASeqImporter();
+			//ExternalRNASeqImporter externalRNASeqImporter = new ExternalRNASeqImporter();
 			
 			for (Path file : externalRNASeqFiles) {
+				ExternalRNASeqImporter externalRNASeqImporter = new ExternalRNASeqImporter();
 				externalRNASeqImporter.createCounts(file);
 			}
 			
-			List<Path> essentialomeFiles = crawler.readFilesFromDirectory(options.valueOf(essentialomeDirPar), ".tsv", false);
+			List<Path> essentialomeFiles = crawler.readFilesFromDirectory(options.valueOf(essentialomeDirPar), "palantir.public.essentialome", false);
 			
 			EssentialomeImporter essentialomeImporter = new EssentialomeImporter();
 			
