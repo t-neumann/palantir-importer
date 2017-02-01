@@ -94,7 +94,18 @@ public class ExternalRNASeqImporter {
 
 			BufferedReader reader = new BufferedReader(new FileReader(referenceFile.toString()));
 			String header = reader.readLine();
+			// First lines contains # followed by number of header lines.
+			int headerlines = Integer.parseInt(header.substring(1));
+			
+			header = reader.readLine();
 			String[] resources = header.split("\t");
+			
+			String[] contexts = null;
+			// No context info
+			if (headerlines > 1) {
+				header = reader.readLine();
+				contexts = header.split("\t");
+			}
 
 			resourcePosArray = new ExternalRNASeqEntry[resources.length - 2];
 			
@@ -105,6 +116,9 @@ public class ExternalRNASeqImporter {
 				resourcePosArray[i - 2] = new ExternalRNASeqEntry();
 				resourcePosArray[i - 2].setName(resources[i]);
 				resourcePosArray[i - 2].setResource(resource);
+				if (contexts != null) {
+					resourcePosArray[i - 2].setContext(contexts[i]);
+				}
 				resource.addEntry(resourcePosArray[i - 2]);
 			}
 			
@@ -115,7 +129,7 @@ public class ExternalRNASeqImporter {
 			Stream<String> lines = Files.lines(referenceFile, Charset.defaultCharset());
 
 			provider.sessionStart();
-			lines.skip(1L).forEachOrdered(line -> createDatapointFromLine(resource, line));
+			lines.skip(headerlines + 1).forEachOrdered(line -> createDatapointFromLine(resource, line));
 			provider.persist(resource);
 			provider.sessionEnd();
 
