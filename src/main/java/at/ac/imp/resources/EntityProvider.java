@@ -12,6 +12,7 @@ import javax.persistence.TypedQuery;
 
 import at.ac.imp.palantir.exceptions.DatabaseException;
 import at.ac.imp.palantir.model.Alignment;
+import at.ac.imp.palantir.model.GenericGene;
 import at.ac.imp.palantir.model.Reference;
 import at.ac.imp.palantir.model.Result;
 import at.ac.imp.palantir.model.Sample;
@@ -113,5 +114,11 @@ public class EntityProvider {
 		references = query.getResultList();
 		
 		return references;
+	}
+	
+	public List<GenericGene> getAllGenericGenes() {
+		TypedQuery<GenericGene> query = em.createQuery("SELECT g FROM GenericGene g", GenericGene.class);
+		
+		return query.getResultList();
 	}
 }

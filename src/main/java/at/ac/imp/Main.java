@@ -94,7 +94,7 @@ public class Main {
 
 				long startTime = System.currentTimeMillis();
 
-				counter.createCounts(file);
+				//counter.createCounts(file);
 
 				long endTime = System.currentTimeMillis();
 
@@ -106,10 +106,9 @@ public class Main {
 			// Read external RNASeq data
 			List<Path> externalRNASeqFiles = crawler.readFilesFromDirectory(options.valueOf(publicRNASeqDirPar), "palantir.public.rnaseq", false);
 			
-			//ExternalRNASeqImporter externalRNASeqImporter = new ExternalRNASeqImporter();
+			ExternalRNASeqImporter externalRNASeqImporter = new ExternalRNASeqImporter();
 			
 			for (Path file : externalRNASeqFiles) {
-				ExternalRNASeqImporter externalRNASeqImporter = new ExternalRNASeqImporter();
 				externalRNASeqImporter.createCounts(file);
 			}
 			
