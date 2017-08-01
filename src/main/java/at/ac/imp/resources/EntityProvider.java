@@ -16,6 +16,7 @@ import at.ac.imp.palantir.model.GenericGene;
 import at.ac.imp.palantir.model.Reference;
 import at.ac.imp.palantir.model.Result;
 import at.ac.imp.palantir.model.Sample;
+import at.ac.imp.palantir.model.ScreenGene;
 
 public class EntityProvider {
 
@@ -118,6 +119,12 @@ public class EntityProvider {
 	
 	public List<GenericGene> getAllGenericGenes() {
 		TypedQuery<GenericGene> query = em.createQuery("SELECT g FROM GenericGene g", GenericGene.class);
+		
+		return query.getResultList();
+	}
+	
+	public List<ScreenGene> getAllScreenGenes() {
+		TypedQuery<ScreenGene> query = em.createQuery("SELECT g FROM ScreenGene g", ScreenGene.class);
 		
 		return query.getResultList();
 	}

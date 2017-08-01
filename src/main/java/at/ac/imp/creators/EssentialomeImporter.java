@@ -33,6 +33,8 @@ public class EssentialomeImporter {
 	private EntityProvider provider;
 
 	private List<EssentialomeEntry> entries;
+	
+	private Map<String, ScreenGene> geneMap = new HashMap<String, ScreenGene>();
 
 	public EssentialomeImporter() {
 		this.provider = new EntityProvider();
@@ -41,20 +43,37 @@ public class EssentialomeImporter {
 	public void createCounts(Path countFile) {
 		
 		counter = 0;
+		
+		loadGenes();
 
 		Essentialome essentialome = readData(countFile);
 
-		provider.sessionStart();
+		
 		
 		linkGenesToEssentialome(essentialome);
 		
-		provider.persist(essentialome);
+
+		
+	}
+	
+	private void loadGenes() {
+		
+		provider.sessionStart();
+		
+		List<ScreenGene> publicGenes = provider.getAllScreenGenes();
 		
 		provider.sessionEnd();
+		
+		for (ScreenGene gene : publicGenes) {
+			geneMap.put(gene.getEntrezId(), gene);
+		}
 		
 	}
 
 	private void linkGenesToEssentialome(Essentialome essentialome) {
+		
+		provider.sessionStart();
+		
 		List<Reference> references = provider.getAllReferences();
 
 		for (Reference reference : references) {
@@ -71,7 +90,12 @@ public class EssentialomeImporter {
 				}
 			}
 		}
+		
+		provider.merge(essentialome);
+		
+		provider.sessionEnd();
 	}
+	
 
 	private Essentialome readData(Path inputFile) {
 
@@ -83,6 +107,12 @@ public class EssentialomeImporter {
 		System.out.println("EssentialomeImport:\tImporting essentialome " + name + ".");
 
 		essentialome.setName(name);
+		
+		provider.sessionStart();
+
+		provider.persist(essentialome);
+		
+		provider.sessionEnd();
 
 		try {
 
@@ -145,10 +175,16 @@ public class EssentialomeImporter {
 		String aliases = fields[4];
 		String chrLocation = fields[5];
 		String type = fields[6];
+		
+		ScreenGene gene = null;
+		
+		if (!geneMap.containsKey(entrezId)) {
+			gene = new ScreenGene(entrezId, geneSymbol, essential, pool, aliases, chrLocation, type);
+		} else {
+			gene = geneMap.get(entrezId);
+		}
 
-		ScreenGene gene = new ScreenGene(entrezId, geneSymbol, essential, pool, aliases, chrLocation, type);
-
-		gene.setEssentialome(essentialome);
+		gene.addEssentialome(essentialome);
 		essentialome.addScreenGene(gene);
 		
 		for (int i = EssentialomeImporter.ESSENTIALOME_START; i < fields.length; ++i) {
