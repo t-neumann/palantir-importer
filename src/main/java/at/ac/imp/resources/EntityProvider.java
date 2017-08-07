@@ -12,6 +12,8 @@ import javax.persistence.TypedQuery;
 
 import at.ac.imp.palantir.exceptions.DatabaseException;
 import at.ac.imp.palantir.model.Alignment;
+import at.ac.imp.palantir.model.Essentialome;
+import at.ac.imp.palantir.model.ExternalRNASeqResource;
 import at.ac.imp.palantir.model.GenericGene;
 import at.ac.imp.palantir.model.Reference;
 import at.ac.imp.palantir.model.Result;
@@ -106,6 +108,40 @@ public class EntityProvider {
 		}
 
 		return result;
+	}
+	
+	public Essentialome findEssentialomeByName(String name) {
+		
+		TypedQuery<Essentialome> query = em.createNamedQuery("Essentialome.findByName", Essentialome.class);
+		
+		Essentialome essentialome = null;
+
+		List<Essentialome> results = query.setParameter("name", name).getResultList();
+		
+		if (results.size() == 1) {
+			essentialome = results.get(0);
+		}		
+		
+		return essentialome;
+	}
+	
+	public ExternalRNASeqResource findExternalRNASeqResourceByName(String name) {
+		
+		TypedQuery<ExternalRNASeqResource> query = em.createNamedQuery("ExternalRNASeqResource.findByName", ExternalRNASeqResource.class);
+		
+		ExternalRNASeqResource resource = null;
+
+		List<ExternalRNASeqResource> results = query.setParameter("name", name).getResultList();
+		
+		if (results.size() == 1) {
+			resource = results.get(0);
+		}		
+		
+		return resource;
+	}
+	
+	public void delete(Object object) {
+		em.remove(object);
 	}
 
 	public List<Reference> getAllReferences() {

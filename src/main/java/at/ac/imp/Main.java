@@ -86,15 +86,15 @@ public class Main {
 
 			for (Path file : countFiles) {
 				
-				if (temp_import > 20) {
-					break;
-				}
+//				if (temp_import > 2) {
+//					break;
+//				}
 				System.out.println("Countfile " + i + " out of " + countFiles.size());
 				System.out.println(file);
 
 				long startTime = System.currentTimeMillis();
 
-				//counter.createCounts(file);
+				counter.createCounts(file);
 
 				long endTime = System.currentTimeMillis();
 

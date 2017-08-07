@@ -16,6 +16,7 @@ import java.util.stream.Stream;
 import javax.persistence.TypedQuery;
 
 import at.ac.imp.palantir.exceptions.DatabaseException;
+import at.ac.imp.palantir.model.Essentialome;
 import at.ac.imp.palantir.model.ExternalRNASeqDatapoint;
 import at.ac.imp.palantir.model.ExternalRNASeqEntry;
 import at.ac.imp.palantir.model.ExternalRNASeqResource;
@@ -31,7 +32,7 @@ public class ExternalRNASeqImporter {
 	private EntityProvider provider;
 
 	private ExternalRNASeqEntry[] resourcePosArray;
-	
+
 	private Map<String, GenericGene> geneMap = new HashMap<String, GenericGene>();
 
 	public ExternalRNASeqImporter() {
@@ -39,35 +40,38 @@ public class ExternalRNASeqImporter {
 	}
 
 	public void createCounts(Path countFile) {
-		
+
 		counter = 0;
-		
+
 		loadGenes();
 
 		ExternalRNASeqResource resource = readData(countFile);
 
-		linkGenesToResource(resource);
-		
+		if (resource != null) {
+
+			linkGenesToResource(resource);
+
+		}
 	}
-	
+
 	private void loadGenes() {
-		
+
 		provider.sessionStart();
-		
+
 		List<GenericGene> publicGenes = provider.getAllGenericGenes();
-		
+
 		provider.sessionEnd();
-		
+
 		for (GenericGene gene : publicGenes) {
 			geneMap.put(gene.getEntrezId(), gene);
 		}
-		
+
 	}
 
 	private void linkGenesToResource(ExternalRNASeqResource resource) {
-		
+
 		provider.sessionStart();
-		
+
 		List<Reference> references = provider.getAllReferences();
 
 		for (Reference reference : references) {
@@ -84,121 +88,146 @@ public class ExternalRNASeqImporter {
 				}
 			}
 		}
-		
+
 		provider.merge(resource);
-		
+
 		provider.sessionEnd();
-		
+
 	}
 
 	private ExternalRNASeqResource readData(Path referenceFile) {
 
 		ExternalRNASeqResource resource = new ExternalRNASeqResource();
-		
+
 		String name = referenceFile.getFileName().toString();
 		name = name.replaceAll("\\.palantir.*", "");
-		
+
 		System.out.println("ExternalRNASeqImport:\tImporting ExternalRNASeqResource " + name + ".");
 
-		resource.setName(name);
-		
-		provider.sessionStart();
+		ExternalRNASeqResource query = provider.findExternalRNASeqResourceByName(name);
 
-		provider.persist(resource);
-		
-		provider.sessionEnd();
+		if (query != null && !query.isValid()) {
 
-		try {
+			System.out.println("Deleting incomplete ExternalRNASeqResource import.");
 
-			BufferedReader reader = new BufferedReader(new FileReader(referenceFile.toString()));
-			String header = reader.readLine();
-			// First lines contains # followed by number of header lines.
-			int headerlines = Integer.parseInt(header.substring(1));
-			
-			String organism = reader.readLine().substring(1);
-			
-			header = reader.readLine();
-			String[] resources = header.split("\t");
-			
-			String[] contexts = null;
-			
-			// No context info
-			if (headerlines > 2) {
-				header = reader.readLine();
-				contexts = header.split("\t");
-			}
-
-			resourcePosArray = new ExternalRNASeqEntry[resources.length - 2];
-			
 			provider.sessionStart();
 
+			provider.delete(query);
 
-			for (int i = 2; i < resources.length; ++i) {
-				resourcePosArray[i - 2] = new ExternalRNASeqEntry();
-				resourcePosArray[i - 2].setName(resources[i]);
-				resourcePosArray[i - 2].setResource(resource);
-				if (contexts != null) {
-					resourcePosArray[i - 2].setContext(contexts[i]);
-				}
-				resource.addEntry(resourcePosArray[i - 2]);
-			}
-			
+			provider.sessionEnd();
+		}
+
+		if (provider.findExternalRNASeqResourceByName(name) == null
+				|| !provider.findExternalRNASeqResourceByName(name).isValid()) {
+
+			resource.setName(name);
+
+			provider.sessionStart();
+
 			provider.persist(resource);
 
-			provider.sessionEnd();			
+			provider.sessionEnd();
 
-			Stream<String> lines = Files.lines(referenceFile, Charset.defaultCharset());
+			try {
 
+				BufferedReader reader = new BufferedReader(new FileReader(referenceFile.toString()));
+				String header = reader.readLine();
+				// First lines contains # followed by number of header lines.
+				int headerlines = Integer.parseInt(header.substring(1));
+
+				String organism = reader.readLine().substring(1);
+
+				header = reader.readLine();
+				String[] resources = header.split("\t");
+
+				String[] contexts = null;
+
+				// No context info
+				if (headerlines > 2) {
+					header = reader.readLine();
+					contexts = header.split("\t");
+				}
+
+				resourcePosArray = new ExternalRNASeqEntry[resources.length - 2];
+
+				provider.sessionStart();
+
+				for (int i = 2; i < resources.length; ++i) {
+					resourcePosArray[i - 2] = new ExternalRNASeqEntry();
+					resourcePosArray[i - 2].setName(resources[i]);
+					resourcePosArray[i - 2].setResource(resource);
+					if (contexts != null) {
+						resourcePosArray[i - 2].setContext(contexts[i]);
+					}
+					resource.addEntry(resourcePosArray[i - 2]);
+				}
+
+				provider.persist(resource);
+
+				provider.sessionEnd();
+
+				Stream<String> lines = Files.lines(referenceFile, Charset.defaultCharset());
+
+				provider.sessionStart();
+				lines.skip(headerlines + 1).forEachOrdered(line -> createDatapointFromLine(resource, organism, line));
+				provider.persist(resource);
+				provider.sessionEnd();
+
+				lines.close();
+				reader.close();
+
+			} catch (IOException e) {
+				e.getMessage();
+			}
+			
 			provider.sessionStart();
-			lines.skip(headerlines + 1).forEachOrdered(line -> createDatapointFromLine(resource, organism, line));
+			resource.setValid(true);
 			provider.persist(resource);
 			provider.sessionEnd();
 
-			lines.close();
-			reader.close();
+			return resource;
 
-		} catch (IOException e) {
-			e.getMessage();
+		} else {
+			System.out.println("ExternalRNASeqResource imported already.");
+			return null;
 		}
-
-		return resource;
 	}
 
 	private void createDatapointFromLine(ExternalRNASeqResource resource, String organism, String line) {
-		
+
 		if (counter % 1000 == 0 && counter > 0) {
 			System.out.println("ExternalRNASeqImport:\tHandled line " + counter + ".");
-			
+
 			provider.persist(resource);
-						
+
 			provider.sessionEnd();
-			
+
 			provider.sessionStart();
 		}
-		
-//		if (resource.getName().equals("Leucegene_CBFB-MYH11")) {
-//			System.out.println("whatever");
-//		}
+
+		// if (resource.getName().equals("Leucegene_CBFB-MYH11")) {
+		// System.out.println("whatever");
+		// }
 
 		String[] fields = line.split("\t");
 		String entrezId = fields[0];
 		String geneSymbol = fields[1];
-		
+
 		GenericGene gene = null;
-		
+
 		if (!geneMap.containsKey(entrezId)) {
 			gene = new GenericGene(entrezId, geneSymbol);
 		} else {
 			gene = geneMap.get(entrezId);
 		}
-		
+
 		gene.setOrganism(organism);
 
-		//GenericGene gene = new GenericGene(entrezId, geneSymbol);
+		// GenericGene gene = new GenericGene(entrezId, geneSymbol);
 
 		resource.addGenericGene(gene);
 		gene.addResource(resource);
-		//provider.persist(gene);
+		// provider.persist(gene);
 
 		for (int i = 2; i < fields.length; ++i) {
 			ExternalRNASeqDatapoint datapoint = new ExternalRNASeqDatapoint(Float.parseFloat(fields[i]));
@@ -206,7 +235,7 @@ public class ExternalRNASeqImporter {
 			datapoint.setGene(gene);
 			gene.addDatapoint(datapoint);
 			resourcePosArray[i - 2].addDatapoint(datapoint);
-			//provider.persist(resourcePosArray[i - 2]);
+			// provider.persist(resourcePosArray[i - 2]);
 		}
 		++counter;
 	}
